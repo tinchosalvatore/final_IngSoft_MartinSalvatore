@@ -2,6 +2,7 @@
   <a routerLink="/" class="volver">&larr; Volver al inicio</a>
   <h1>Solicitudes de amistad</h1>
 
+  <p *ngIf="aviso" class="aviso">{{ aviso }}</p>
   <p *ngIf="cargando" class="estado">Cargando...</p>
 
   <ul *ngIf="!cargando && solicitudes.length > 0" class="lista">
@@ -11,7 +12,10 @@
         <strong>{{ s.remitenteNombre }}</strong>
         <span class="user">&#64;{{ s.remitenteUsuario }}</span>
       </div>
-      <span class="estado-tag">{{ s.estado }}</span>
+      <div class="acciones">
+        <button class="aceptar" (click)="aceptar(s)">Aceptar</button>
+        <button class="rechazar" (click)="rechazar(s)">Rechazar</button>
+      </div>
     </li>
   </ul>
 

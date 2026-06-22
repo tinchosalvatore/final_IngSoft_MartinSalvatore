@@ -27,6 +27,7 @@ yarn-error.log*
 *.h2.db
 *.mv.db
 *.trace.db
+study.md
 
 # ---- Configuracion sensible / entorno ----
 .env
@@ -52,3 +53,4 @@ nbproject/
 .DS_Store
 Thumbs.db
 *~
+

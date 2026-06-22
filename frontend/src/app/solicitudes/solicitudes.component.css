@@ -63,11 +63,34 @@ h1 {
   font-size: 0.85rem;
 }
 
-.estado-tag {
-  background: #fff3cd;
-  color: #856404;
-  border-radius: 12px;
-  padding: 0.2rem 0.7rem;
-  font-size: 0.75rem;
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.acciones button {
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
   font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.acciones .aceptar {
+  background: #1877f2;
+  color: #fff;
+}
+
+.acciones .rechazar {
+  background: #e4e6eb;
+  color: #1c1e21;
+}
+
+.aviso {
+  background: #e7f3ff;
+  color: #1877f2;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
 }

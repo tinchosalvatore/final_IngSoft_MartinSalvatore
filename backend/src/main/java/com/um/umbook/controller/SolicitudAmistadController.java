@@ -7,11 +7,14 @@ import com.um.umbook.service.SolicitudAmistadService;
 import com.um.umbook.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Endpoints de solicitudes de amistad. CU-14 (click en notificacion):
@@ -39,5 +42,17 @@ public class SolicitudAmistadController {
             throw new UsuarioNotFoundException("Usuario no encontrado");
         }
         return ResponseEntity.ok(solicitudService.obtenerPendientes(usuario));
+    }
+
+    @PostMapping("/{id}/aceptar")
+    public ResponseEntity<Map<String, String>> aceptar(@PathVariable Long id) {
+        solicitudService.aceptarSolicitud(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud aceptada"));
+    }
+
+    @PostMapping("/{id}/rechazar")
+    public ResponseEntity<Map<String, String>> rechazar(@PathVariable Long id) {
+        solicitudService.rechazarSolicitud(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud rechazada"));
     }
 }

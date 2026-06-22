@@ -67,8 +67,10 @@
     <div class="caja">
       <h3>Contactos</h3>
       <ul class="contactos">
-        <li *ngFor="let c of contactos">
-          <span class="dot"></span>{{ c }}
+        <li *ngFor="let c of contactos; let i = index">
+          <a [routerLink]="['/chat', i + 1]" [queryParams]="{ nombre: c }">
+            <span class="dot"></span>{{ c }}
+          </a>
         </li>
       </ul>
     </div>

@@ -1,0 +1,18 @@
+<section class="chat">
+  <header class="chat-head">
+    <a routerLink="/" class="volver">&larr;</a>
+    <span class="avatar">{{ iniciales }}</span>
+    <strong>{{ amigo }}</strong>
+  </header>
+
+  <div class="mensajes">
+    <div *ngFor="let m of mensajes" class="burbuja" [class.mia]="m.de === 'yo'">
+      {{ m.texto }}
+    </div>
+  </div>
+
+  <form class="barra" (ngSubmit)="enviar()">
+    <input [(ngModel)]="borrador" name="borrador" placeholder="Escribi un mensaje..." autocomplete="off" />
+    <button type="submit">Enviar</button>
+  </form>
+</section>

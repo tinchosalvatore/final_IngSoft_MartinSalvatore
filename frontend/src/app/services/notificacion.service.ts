@@ -45,6 +45,14 @@ export class NotificacionService {
     return this.http.get<SolicitudAmistad[]>(`${API_URL}/solicitudes/pendientes`);
   }
 
+  aceptarSolicitud(id: number): Observable<unknown> {
+    return this.http.post(`${API_URL}/solicitudes/${id}/aceptar`, {});
+  }
+
+  rechazarSolicitud(id: number): Observable<unknown> {
+    return this.http.post(`${API_URL}/solicitudes/${id}/rechazar`, {});
+  }
+
   /** Notificaciones no leidas (para el contador de la campana). */
   obtenerNoLeidas(): Observable<Notificacion[]> {
     return this.http.get<Notificacion[]>(`${API_URL}/notificaciones/no-leidas`);

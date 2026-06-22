@@ -55,6 +55,10 @@ export class ToastComponent implements OnInit, OnDestroy {
   alClickear(toast: ToastVisible): void {
     if (toast.tipo === 'SOLICITUD_AMISTAD') {
       this.router.navigate(['/solicitudes']);
+    } else if (toast.tipo === 'CUMPLEANOS') {
+      // CU-15: click en la notificacion -> chat con el cumpleañero.
+      const nombre = toast.mensaje.replace(/ cumple años hoy.*$/i, '').trim();
+      this.router.navigate(['/chat', toast.referenciaId], { queryParams: { nombre, cumple: 1 } });
     }
     this.cerrar(toast.uid);
   }

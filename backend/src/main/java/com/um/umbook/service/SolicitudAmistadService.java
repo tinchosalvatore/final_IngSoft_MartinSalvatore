@@ -1,6 +1,7 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.SolicitudAmistadDTO;
+import com.um.umbook.exception.SolicitudNotFoundException;
 import com.um.umbook.model.EstadoSolicitud;
 import com.um.umbook.model.SolicitudAmistad;
 import com.um.umbook.model.TipoNotificacion;
@@ -22,13 +23,16 @@ public class SolicitudAmistadService {
     private final SolicitudAmistadRepository solicitudRepository;
     private final NotificacionService notificacionService;
     private final JavaMailService mailService;
+    private final AmistadService amistadService;
 
     public SolicitudAmistadService(SolicitudAmistadRepository solicitudRepository,
                                    NotificacionService notificacionService,
-                                   JavaMailService mailService) {
+                                   JavaMailService mailService,
+                                   AmistadService amistadService) {
         this.solicitudRepository = solicitudRepository;
         this.notificacionService = notificacionService;
         this.mailService = mailService;
+        this.amistadService = amistadService;
     }
 
     public String generarTokenEmail() {
@@ -58,5 +62,23 @@ public class SolicitudAmistadService {
         return solicitudRepository.findByDestinatarioAndEstado(usuario, EstadoSolicitud.PENDIENTE).stream()
                 .map(SolicitudAmistadDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    /** Acepta una solicitud pendiente: la marca ACEPTADA y crea la amistad. */
+    public SolicitudAmistad aceptarSolicitud(Long solicitudId) {
+        SolicitudAmistad solicitud = solicitudRepository.findById(solicitudId)
+                .orElseThrow(() -> new SolicitudNotFoundException("Solicitud no encontrada"));
+        solicitud.setEstado(EstadoSolicitud.ACEPTADA);
+        solicitudRepository.save(solicitud);
+        amistadService.crearAmistad(solicitud.getRemitente(), solicitud.getDestinatario());
+        return solicitud;
+    }
+
+    /** Rechaza una solicitud pendiente: la marca RECHAZADA. */
+    public SolicitudAmistad rechazarSolicitud(Long solicitudId) {
+        SolicitudAmistad solicitud = solicitudRepository.findById(solicitudId)
+                .orElseThrow(() -> new SolicitudNotFoundException("Solicitud no encontrada"));
+        solicitud.setEstado(EstadoSolicitud.RECHAZADA);
+        return solicitudRepository.save(solicitud);
     }
 }

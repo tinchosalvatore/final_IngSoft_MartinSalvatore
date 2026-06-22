@@ -1,0 +1,76 @@
+<!-- Barra superior -->
+<header class="navbar">
+  <div class="nav-left">
+    <span class="brand">UM<span>Book</span></span>
+    <!-- UNICO link real: buscador (CU-13) -->
+    <a routerLink="/buscador" class="search-shortcut">
+      <span class="lupa">&#128269;</span> Buscar usuarios
+    </a>
+  </div>
+
+  <div class="nav-right">
+    <!-- La campana se conecta al stream SSE en el objetivo 6 -->
+    <button class="icono campana" title="Notificaciones">
+      &#128276;
+      <span class="badge" *ngIf="false">0</span>
+    </button>
+    <a routerLink="/registro" class="icono" title="Crear cuenta">&#128100;+</a>
+    <span class="avatar">{{ usuarioActual.iniciales }}</span>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar izquierdo -->
+  <aside class="col izquierda">
+    <div class="perfil-mini">
+      <span class="avatar">{{ usuarioActual.iniciales }}</span>
+      <span>{{ usuarioActual.nombre }}</span>
+    </div>
+    <ul class="accesos">
+      <li *ngFor="let a of accesos">{{ a }}</li>
+    </ul>
+    <p class="nota">Demo UI &mdash; solo el buscador es funcional</p>
+  </aside>
+
+  <!-- Feed central -->
+  <main class="col centro">
+    <div class="crear-post">
+      <span class="avatar">{{ usuarioActual.iniciales }}</span>
+      <input placeholder="Que estas pensando, {{ usuarioActual.nombre }}?" disabled />
+    </div>
+
+    <article class="post" *ngFor="let p of publicaciones">
+      <div class="post-head">
+        <span class="avatar">{{ p.iniciales }}</span>
+        <div>
+          <strong>{{ p.autor }}</strong>
+          <span class="tiempo">{{ p.tiempo }}</span>
+        </div>
+      </div>
+      <p class="post-texto">{{ p.texto }}</p>
+      <div class="post-acciones">
+        <span>&#128077; {{ p.meGusta }}</span>
+        <span>&#128172; {{ p.comentarios }}</span>
+        <span>&#10150; Compartir</span>
+      </div>
+    </article>
+  </main>
+
+  <!-- Sidebar derecho -->
+  <aside class="col derecha">
+    <div class="caja">
+      <h3>&#127874; Cumpleaños</h3>
+      <ul>
+        <li *ngFor="let c of cumpleanos">{{ c }}</li>
+      </ul>
+    </div>
+    <div class="caja">
+      <h3>Contactos</h3>
+      <ul class="contactos">
+        <li *ngFor="let c of contactos">
+          <span class="dot"></span>{{ c }}
+        </li>
+      </ul>
+    </div>
+  </aside>
+</div>

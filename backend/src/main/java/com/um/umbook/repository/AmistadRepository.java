@@ -25,13 +25,16 @@ public interface AmistadRepository extends JpaRepository<Amistad, Long> {
      */
     @Query("""
         select c from Usuario c
-        where c in (
-            select case when a1.usuario1 = :u1 then a1.usuario2 else a1.usuario1 end
-            from Amistad a1 where a1.usuario1 = :u1 or a1.usuario2 = :u1
+        where c <> :u1 and c <> :u2
+        and exists (
+            select 1 from Amistad a1
+            where (a1.usuario1 = :u1 and a1.usuario2 = c)
+               or (a1.usuario2 = :u1 and a1.usuario1 = c)
         )
-        and c in (
-            select case when a2.usuario1 = :u2 then a2.usuario2 else a2.usuario1 end
-            from Amistad a2 where a2.usuario1 = :u2 or a2.usuario2 = :u2
+        and exists (
+            select 1 from Amistad a2
+            where (a2.usuario1 = :u2 and a2.usuario2 = c)
+               or (a2.usuario2 = :u2 and a2.usuario1 = c)
         )
         """)
     List<Usuario> findAmigosEnComun(@Param("u1") Usuario u1, @Param("u2") Usuario u2);

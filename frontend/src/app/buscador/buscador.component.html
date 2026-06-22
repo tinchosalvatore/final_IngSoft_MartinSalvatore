@@ -1,0 +1,31 @@
+<section class="buscador">
+  <a routerLink="/" class="volver">&larr; Volver al inicio</a>
+
+  <h1>Buscar usuarios</h1>
+  <p class="sub">Personas que quizas conozcas (con amigos en comun)</p>
+
+  <div class="controles">
+    <label>
+      Minimo de amigos en comun:
+      <input type="number" min="1" [(ngModel)]="minAmigos" />
+    </label>
+    <button (click)="buscar()" [disabled]="buscando">
+      {{ buscando ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </div>
+
+  <ul class="resultados" *ngIf="usuarios.length > 0">
+    <li *ngFor="let u of usuarios" class="card">
+      <div class="avatar">{{ u.nombre.charAt(0) }}{{ u.apellido.charAt(0) }}</div>
+      <div class="info">
+        <strong>{{ u.nombre }} {{ u.apellido }}</strong>
+        <span class="user">&#64;{{ u.nombreUsuario }}</span>
+        <span class="comun">{{ u.amigosEnComun }} amigos en comun</span>
+      </div>
+    </li>
+  </ul>
+
+  <p class="vacio" *ngIf="yaBusco && !buscando && usuarios.length === 0">
+    {{ mensaje || 'No se encontraron usuarios' }}
+  </p>
+</section>

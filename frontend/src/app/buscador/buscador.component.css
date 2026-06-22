@@ -1,0 +1,106 @@
+.buscador {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+.volver {
+  color: #1877f2;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+h1 {
+  margin: 0.5rem 0 0;
+  color: #1c1e21;
+}
+
+.sub {
+  color: #65676b;
+  margin-top: 0.25rem;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.controles input {
+  width: 4rem;
+  padding: 0.4rem;
+  margin-left: 0.5rem;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+}
+
+.controles button {
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controles button:disabled {
+  background: #9cb4d8;
+  cursor: default;
+}
+
+.resultados {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1877f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.info .user {
+  color: #65676b;
+  font-size: 0.85rem;
+}
+
+.info .comun {
+  color: #1877f2;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+.vacio {
+  color: #65676b;
+  font-style: italic;
+  margin-top: 1.5rem;
+}

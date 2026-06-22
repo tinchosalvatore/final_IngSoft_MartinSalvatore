@@ -1,0 +1,73 @@
+.solicitudes {
+  max-width: 560px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+.volver {
+  color: #1877f2;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+h1 {
+  margin: 0.5rem 0 1.2rem;
+  color: #1c1e21;
+}
+
+.estado {
+  color: #65676b;
+  font-style: italic;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1877f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.info .user {
+  color: #65676b;
+  font-size: 0.85rem;
+}
+
+.estado-tag {
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 12px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

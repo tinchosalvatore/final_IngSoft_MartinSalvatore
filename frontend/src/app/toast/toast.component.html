@@ -1,0 +1,11 @@
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" (click)="alClickear(t)"
+       [class.cumple]="t.tipo === 'CUMPLEANOS'">
+    <span class="icono">{{ icono(t.tipo) }}</span>
+    <div class="cuerpo">
+      <strong>{{ t.tipo === 'CUMPLEANOS' ? 'Cumpleaños' : 'Solicitud de amistad' }}</strong>
+      <span class="msg">{{ t.mensaje }}</span>
+    </div>
+    <button class="cerrar" (click)="cerrar(t.uid); $event.stopPropagation()">&times;</button>
+  </div>
+</div>

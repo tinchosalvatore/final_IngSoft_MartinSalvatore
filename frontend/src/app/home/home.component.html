@@ -9,11 +9,11 @@
   </div>
 
   <div class="nav-right">
-    <!-- La campana se conecta al stream SSE en el objetivo 6 -->
-    <button class="icono campana" title="Notificaciones">
+    <!-- Campana: lleva a las solicitudes pendientes (CU-14 click). Los toasts en vivo
+         llegan por SSE via el ToastComponent global. -->
+    <a routerLink="/solicitudes" class="icono campana" title="Notificaciones">
       &#128276;
-      <span class="badge" *ngIf="false">0</span>
-    </button>
+    </a>
     <a routerLink="/registro" class="icono" title="Crear cuenta">&#128100;+</a>
     <span class="avatar">{{ usuarioActual.iniciales }}</span>
   </div>

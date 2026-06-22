@@ -1,0 +1,40 @@
+<section class="registro">
+  <a routerLink="/" class="volver">&larr; Volver al inicio</a>
+
+  <h1>Crear cuenta</h1>
+  <p class="sub">Registrate en UM-Book</p>
+
+  <form #f="ngForm" (ngSubmit)="registrar()" class="form">
+    <div class="fila">
+      <label>Nombre
+        <input name="nombre" [(ngModel)]="datos.nombre" required />
+      </label>
+      <label>Apellido
+        <input name="apellido" [(ngModel)]="datos.apellido" required />
+      </label>
+    </div>
+
+    <label>Email
+      <input name="email" type="email" [(ngModel)]="datos.email" required />
+    </label>
+
+    <label>Nombre de usuario
+      <input name="nombreUsuario" [(ngModel)]="datos.nombreUsuario" required />
+    </label>
+
+    <label>Contrasena
+      <input name="contrasena" type="password" [(ngModel)]="datos.contrasena" required minlength="6" />
+    </label>
+
+    <label>Fecha de nacimiento
+      <input name="fechaNacimiento" type="date" [(ngModel)]="datos.fechaNacimiento" required />
+    </label>
+
+    <button type="submit" [disabled]="enviando || f.invalid">
+      {{ enviando ? 'Registrando...' : 'Registrarme' }}
+    </button>
+  </form>
+
+  <p class="ok" *ngIf="exito">{{ exito }}</p>
+  <p class="err" *ngIf="error">{{ error }}</p>
+</section>

@@ -17,4 +17,19 @@ export class UsuarioService {
     const params = new HttpParams().set('amigosEnComun', minAmigos);
     return this.http.get<Usuario[]>(`${API_URL}/usuarios`, { params });
   }
+
+  /** Alta de usuario: POST /usuarios. */
+  registrar(datos: RegistroDatos): Observable<Usuario> {
+    return this.http.post<Usuario>(`${API_URL}/usuarios`, datos);
+  }
+}
+
+/** Datos de entrada para el alta (espeja RegistroDTO.java). */
+export interface RegistroDatos {
+  nombre: string;
+  apellido: string;
+  email: string;
+  nombreUsuario: string;
+  contrasena: string;
+  fechaNacimiento: string;
 }

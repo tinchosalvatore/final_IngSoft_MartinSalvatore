@@ -1,8 +1,10 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.UsuarioDTO;
+import com.um.umbook.exception.UsuarioYaExisteException;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,14 +20,33 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final AmistadService amistadService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, AmistadService amistadService) {
+    public UsuarioService(UsuarioRepository usuarioRepository, AmistadService amistadService,
+                          PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.amistadService = amistadService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario obtenerPorId(Long id) {
         return usuarioRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Registra un usuario nuevo. Verifica que email y nombre de usuario sean unicos
+     * y guarda la contrasena hasheada con BCrypt.
+     */
+    public Usuario registrar(Usuario usuario) {
+        if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
+            throw new UsuarioYaExisteException("Ya existe un usuario con ese email");
+        }
+        if (usuarioRepository.findByNombreUsuario(usuario.getNombreUsuario()) != null) {
+            throw new UsuarioYaExisteException("Ya existe un usuario con ese nombre de usuario");
+        }
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        usuario.setActivo(true);
+        return usuarioRepository.save(usuario);
     }
 
     /** Busqueda por texto (nombre o apellido) usada por la searchbar. */

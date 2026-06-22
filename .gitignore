@@ -1,0 +1,54 @@
+# ===== UM-Book root .gitignore =====
+# Red de seguridad global. Cada subproyecto (backend/, frontend/) tiene ademas el suyo.
+
+# ---- Java / Maven (backend) ----
+backend/target/
+target/
+*.class
+*.jar
+*.war
+!**/.mvn/wrapper/maven-wrapper.jar
+hs_err_pid*
+replay_pid*
+
+# ---- Node / Angular (frontend) ----
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.angular/
+frontend/.angular/
+npm-debug.log*
+yarn-error.log*
+
+# ---- Bases de datos locales ----
+*.db
+*.sqlite
+*.h2.db
+*.mv.db
+*.trace.db
+
+# ---- Configuracion sensible / entorno ----
+.env
+.env.*
+application-local.properties
+application-secret.properties
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- IDEs / editores ----
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+.settings/
+.project
+.classpath
+nbproject/
+
+# ---- Sistema operativo ----
+.DS_Store
+Thumbs.db
+*~

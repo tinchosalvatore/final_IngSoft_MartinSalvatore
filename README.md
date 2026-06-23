@@ -54,7 +54,8 @@ final_IngSoft_MartinSalvatore/
 │       └── models/           <- Interfaces (Usuario, Notificacion, ...)
 │
 ├── scripts/                  <- TriggerSolicitud.java, TriggerCumple.java (disparan las notis)
-└── docs/                     <- IMPL_PLAN.md, diseño/, analisis/, tests/
+├── docs/                     <- IMPL_PLAN.md, diseño/, analisis/, tests/
+└── boot.sh                   <- levanta backend + frontend de una sola vez
 ```
 
 ---
@@ -62,6 +63,19 @@ final_IngSoft_MartinSalvatore/
 ## Correr el proyecto
 
 Requisitos: Java 21 y Node 18+. No requiere Docker ni MySQL (la demo usa H2 en memoria).
+
+### Inicio rápido (script)
+
+Para levantar **backend + frontend** de una sola vez:
+
+```bash
+./boot.sh          # backend con H2 (la demo arranca sola)
+./boot.sh mysql    # backend con perfil MySQL 8.4
+```
+
+El script fuerza Java 21, instala las dependencias del frontend si faltan, y con un
+solo `Ctrl+C` frena ambos procesos. Si preferís arrancar cada parte a mano, seguí los
+pasos de abajo.
 
 ### 1. Backend (puerto 8080)
 

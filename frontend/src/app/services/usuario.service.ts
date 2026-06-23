@@ -18,6 +18,25 @@ export class UsuarioService {
     return this.http.get<Usuario[]>(`${API_URL}/usuarios`, { params });
   }
 
+  /** Busqueda por texto de la searchbar: GET /usuarios?q=texto. */
+  buscarPorTexto(texto: string): Observable<Usuario[]> {
+    const params = new HttpParams().set('q', texto);
+    return this.http.get<Usuario[]>(`${API_URL}/usuarios`, { params });
+  }
+
+  /** CU-15: usuarios que cumplen años hoy. Alimenta la tarjeta de Cumpleaños del home. */
+  cumpleanosDeHoy(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${API_URL}/usuarios/cumpleanos`);
+  }
+
+  /**
+   * Demo del boton "recargar sugerencias": POST /usuarios/sugerencia-extra.
+   * Agrega un lote de dos usuarios con +2 amigos en comun; 404 cuando no quedan mas.
+   */
+  agregarSugerenciaExtra(): Observable<Usuario[]> {
+    return this.http.post<Usuario[]>(`${API_URL}/usuarios/sugerencia-extra`, {});
+  }
+
   /** Alta de usuario: POST /usuarios. */
   registrar(datos: RegistroDatos): Observable<Usuario> {
     return this.http.post<Usuario>(`${API_URL}/usuarios`, datos);

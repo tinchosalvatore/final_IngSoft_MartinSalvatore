@@ -40,6 +40,14 @@ export class NotificacionService {
     this.eventSource = undefined;
   }
 
+  /**
+   * Emite una notificacion generada en el front (no viene del SSE). Se usa para mostrar
+   * en el mismo toast las excepciones de dominio, ej. CU-13 sin mas sugerencias.
+   */
+  emitirLocal(notificacion: Notificacion): void {
+    this.notificacionesSubject.next(notificacion);
+  }
+
   /** CU-14 (click en notificacion): solicitudes de amistad pendientes. */
   obtenerPendientes(): Observable<SolicitudAmistad[]> {
     return this.http.get<SolicitudAmistad[]>(`${API_URL}/solicitudes/pendientes`);

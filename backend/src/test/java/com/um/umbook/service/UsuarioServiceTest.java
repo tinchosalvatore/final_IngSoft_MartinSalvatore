@@ -33,6 +33,8 @@ class UsuarioServiceTest {
     @Mock
     private AmistadService amistadService;
     @Mock
+    private CumpleanosService cumpleanosService;
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks

@@ -1,0 +1,215 @@
+.perfil {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+.volver {
+  color: #1877f2;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #1877f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.datos h1 {
+  margin: 0;
+  color: #1c1e21;
+  font-size: 1.5rem;
+}
+
+.datos .user {
+  color: #65676b;
+  font-size: 0.9rem;
+}
+
+.datos .comun {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #1877f2;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.stats {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid #e4e6eb;
+  border-bottom: 1px solid #e4e6eb;
+}
+
+.stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats strong {
+  color: #1c1e21;
+  font-size: 1.1rem;
+}
+
+.stats span {
+  color: #65676b;
+  font-size: 0.8rem;
+}
+
+.agregar {
+  width: 100%;
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.bio {
+  color: #444;
+  line-height: 1.5;
+  margin: 1.25rem 0;
+}
+
+.sugeridos {
+  margin: 1.25rem 0;
+}
+
+.sug-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.sugeridos h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1c1e21;
+}
+
+.recargar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff;
+  border: 1px solid #1877f2;
+  color: #1877f2;
+  border-radius: 20px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.recargar:hover:not(:disabled) {
+  background: rgba(24, 119, 242, 0.08);
+}
+
+.recargar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Tira horizontal con scroll lateral (al reves del buscador, que es vertical). */
+.tira {
+  display: flex;
+  flex-direction: row;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+}
+
+.sug-card {
+  flex: 0 0 auto;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.2rem;
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  padding: 0.9rem 0.6rem;
+  cursor: pointer;
+  font: inherit;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.sug-card:hover {
+  background: #f5f6f8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Avatar chico (la regla .avatar general del perfil es de 88px). */
+.sug-card .avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 1.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.sug-card strong {
+  font-size: 0.85rem;
+  color: #1c1e21;
+  line-height: 1.2;
+}
+
+.sug-card .user {
+  font-size: 0.78rem;
+  color: #65676b;
+}
+
+.sug-card .comun {
+  font-size: 0.75rem;
+  color: #1877f2;
+  margin-top: 0.15rem;
+}
+
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.galeria .celda {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #e4e6eb, #d0d4da);
+  border-radius: 4px;
+}

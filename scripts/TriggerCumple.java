@@ -4,14 +4,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
- * Script de demo (CU-15): setea el cumpleaños de un usuario a HOY y corre el batch,
- * para que la UI muestre el toast de cumpleaños en vivo a sus amigos.
+ * Script de demo (CU-15): corre el batch REAL de cumpleaños (POST /cumpleanos/ejecutar-batch),
+ * la misma operacion que normalmente se agendaria a diario. El batch detecta quienes cumplen
+ * hoy y publica eventos; el subsistema de notificaciones reacciona avisando a sus amigos (toast
+ * en vivo). No hay "trigger" de notificacion: la notificacion ocurre porque el batch detecta el hecho.
+ *
+ * Si se pasa un usuarioId, primero edita su cumpleaños a HOY (accion real de perfil,
+ * PUT /usuarios/{id}/cumpleanos) y despues corre el batch, para elegir el cumpleañero.
+ * Sin argumentos, corre el batch tal cual: notifica por quienes ya cumplen hoy (el seed
+ * deja a Ana cumpliendo hoy).
  *
  * Uso (Java 21, single-file, no requiere compilar):
  *   java scripts/TriggerCumple.java
  *   java scripts/TriggerCumple.java <usuarioId>
  *
- * Por defecto: usuario=3 (beto, amigo de martin). El toast lo recibe martin (id=1).
  * Requiere el backend corriendo en http://localhost:8080.
  */
 public class TriggerCumple {
@@ -19,23 +25,31 @@ public class TriggerCumple {
     private static final String BASE = "http://localhost:8080";
 
     public static void main(String[] args) throws Exception {
-        String url = BASE + "/dev/trigger-cumple";
-        if (args.length >= 1) {
-            url += "?usuarioId=" + args[0];
-        }
-
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .POST(HttpRequest.BodyPublishers.noBody())
-                .build();
-
-        System.out.println("POST " + url);
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // Paso opcional: elegir cumpleañero editando su fecha de nacimiento a hoy.
+            if (args.length >= 1) {
+                String urlEdit = BASE + "/usuarios/" + args[0] + "/cumpleanos";
+                HttpRequest edit = HttpRequest.newBuilder()
+                        .uri(URI.create(urlEdit))
+                        .PUT(HttpRequest.BodyPublishers.noBody())
+                        .build();
+                System.out.println("PUT " + urlEdit);
+                HttpResponse<String> rEdit = client.send(edit, HttpResponse.BodyHandlers.ofString());
+                System.out.println("HTTP " + rEdit.statusCode() + " " + rEdit.body());
+            }
+
+            // Operacion real: el batch diario de cumpleaños.
+            String urlBatch = BASE + "/cumpleanos/ejecutar-batch";
+            HttpRequest batch = HttpRequest.newBuilder()
+                    .uri(URI.create(urlBatch))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            System.out.println("POST " + urlBatch);
+            HttpResponse<String> response = client.send(batch, HttpResponse.BodyHandlers.ofString());
             System.out.println("HTTP " + response.statusCode());
             System.out.println(response.body());
-            if (response.statusCode() == 200) {
+            if (response.statusCode() / 100 == 2) {
                 System.out.println(">> Mira la UI: deberia aparecer el toast de cumpleaños.");
             }
         } catch (Exception e) {

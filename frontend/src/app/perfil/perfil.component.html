@@ -1,0 +1,55 @@
+<section class="perfil">
+  <a routerLink="/buscador" class="volver">&larr; Volver al buscador</a>
+
+  <!-- Cabecera: lo unico que cambia entre perfiles es el icono, el nombre y los amigos. -->
+  <header class="cabecera">
+    <div class="avatar">{{ iniciales }}</div>
+    <div class="datos">
+      <h1>{{ nombre }}</h1>
+      <span class="user">&#64;{{ usuario }}</span>
+      <!-- Igual que IG: debajo del nombre, los amigos en comun. -->
+      <span class="comun" *ngIf="amigosEnComun > 0">
+        <app-icon name="people" [size]="15" /> {{ amigosEnComun }} amigos en comun
+      </span>
+    </div>
+  </header>
+
+  <!-- Stats placeholder (iguales para todos). -->
+  <div class="stats">
+    <div><strong>128</strong><span>publicaciones</span></div>
+    <div><strong>540</strong><span>amigos</span></div>
+    <div><strong>312</strong><span>seguidos</span></div>
+  </div>
+
+  <button type="button" class="agregar" disabled>Agregar amigo</button>
+
+  <!-- Bio placeholder (igual para todos). -->
+  <p class="bio">
+    Estudiante de la UM. Este perfil es un placeholder de la demo: el contenido se repite
+    en todos los usuarios salvo el nombre, el icono y los amigos en comun.
+  </p>
+
+  <!-- Sugeridos con +2 amigos en comun (misma data que el buscador), en horizontal. -->
+  <div class="sugeridos" *ngIf="sugeridos.length > 0">
+    <div class="sug-head">
+      <h3><app-icon name="people" [size]="16" /> Personas que quizas conozcas</h3>
+      <button type="button" class="recargar" (click)="recargarSugerencias()" [disabled]="recargando">
+        <app-icon name="people" [size]="15" />
+        {{ recargando ? 'Recargando...' : 'Recargar' }}
+      </button>
+    </div>
+    <div class="tira">
+      <button type="button" class="sug-card" *ngFor="let u of sugeridos" (click)="verPerfil(u)">
+        <span class="avatar">{{ inicialesDe(u) }}</span>
+        <strong>{{ u.nombre }} {{ u.apellido }}</strong>
+        <span class="user">&#64;{{ u.nombreUsuario }}</span>
+        <span class="comun" *ngIf="u.amigosEnComun > 0">{{ u.amigosEnComun }} amigos en comun</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Grilla de fotos placeholder (igual para todos). -->
+  <div class="galeria">
+    <div class="celda" *ngFor="let i of [1,2,3,4,5,6,7,8,9]"></div>
+  </div>
+</section>

@@ -16,6 +16,9 @@ export PATH="$JAVA_HOME/bin:$PATH"
 # Perfil de DB: H2 por defecto, o 'mysql' si se pasa como primer argumento.
 PERFIL="${1:-}"
 
+# Evita el prompt interactivo de analytics de Angular (se cuelga al correr en background).
+export NG_CLI_ANALYTICS=false
+
 # Al salir (Ctrl+C o fin), matar backend y frontend juntos para no dejar puertos colgados.
 limpiar() {
   echo ""
@@ -43,6 +46,19 @@ fi
 
 echo "[boot] arrancando frontend (Angular) en http://localhost:4200 ..."
 ( cd "$RAIZ/frontend" && npm start ) &
+
+# Abrir el navegador en el front cuando :4200 ya responda (espera el primer build de Angular).
+URL_FRONT="http://localhost:4200"
+(
+  for _ in $(seq 1 60); do
+    if curl -sf -o /dev/null "$URL_FRONT"; then
+      echo "[boot] front listo: abriendo navegador en $URL_FRONT ..."
+      xdg-open "$URL_FRONT" >/dev/null 2>&1 || echo "[boot] abri manualmente: $URL_FRONT"
+      break
+    fi
+    sleep 2
+  done
+) &
 
 # Esperar a que cualquiera de los dos termine; el trap limpia el resto.
 echo "[boot] todo levantado. Ctrl+C para frenar."

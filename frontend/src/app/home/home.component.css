@@ -34,6 +34,12 @@
   color: #1c1e21;
 }
 
+/* Alinea cualquier icono SVG inline con el texto que lo acompaña. */
+app-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
 .search-shortcut {
   display: inline-flex;
   align-items: center;
@@ -172,6 +178,28 @@
   border-radius: 20px;
   padding: 0.6rem 1rem;
   font-size: 0.95rem;
+  outline: none;
+}
+
+.crear-post input:focus {
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.crear-post .publicar {
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.crear-post .publicar:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .post-head {
@@ -179,6 +207,22 @@
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.6rem;
+}
+
+.post-head.clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.2rem;
+  margin: -0.2rem -0.2rem 0.4rem;
+  transition: background 0.15s;
+}
+
+.post-head.clickable:hover {
+  background: #f0f2f5;
+}
+
+.post-head.clickable:hover strong {
+  color: #1877f2;
 }
 
 .post-head .tiempo {
@@ -203,6 +247,9 @@
 
 .post-acciones span {
   cursor: default;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 /* ===== Sidebar derecho ===== */
@@ -216,6 +263,9 @@
 .caja h3 {
   margin: 0 0 0.6rem;
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .caja ul {
@@ -230,16 +280,29 @@
   font-size: 0.92rem;
 }
 
-.contactos li a {
+.cumple-item {
+  cursor: pointer;
+}
+
+.cumple-item:hover {
+  color: #1877f2;
+}
+
+.caja li.vacio {
+  color: #65676b;
+  font-style: italic;
+}
+
+.contactos li {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: #1c1e21;
-  text-decoration: none;
   padding: 0.15rem 0;
+  cursor: pointer;
 }
 
-.contactos li a:hover {
+.contactos li:hover {
   color: #1877f2;
 }
 

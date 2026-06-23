@@ -4,7 +4,7 @@
     <span class="brand">UM<span>Book</span></span>
     <!-- UNICO link real: buscador (CU-13) -->
     <a routerLink="/buscador" class="search-shortcut">
-      <span class="lupa">&#128269;</span> Buscar usuarios
+      <app-icon name="search" [size]="18" /> Buscar usuarios
     </a>
   </div>
 
@@ -12,9 +12,11 @@
     <!-- Campana: lleva a las solicitudes pendientes (CU-14 click). Los toasts en vivo
          llegan por SSE via el ToastComponent global. -->
     <a routerLink="/solicitudes" class="icono campana" title="Notificaciones">
-      &#128276;
+      <app-icon name="bell" />
     </a>
-    <a routerLink="/registro" class="icono" title="Crear cuenta">&#128100;+</a>
+    <a routerLink="/registro" class="icono" title="Crear cuenta">
+      <app-icon name="user-plus" />
+    </a>
     <span class="avatar">{{ usuarioActual.iniciales }}</span>
   </div>
 </header>
@@ -36,11 +38,16 @@
   <main class="col centro">
     <div class="crear-post">
       <span class="avatar">{{ usuarioActual.iniciales }}</span>
-      <input placeholder="Que estas pensando, {{ usuarioActual.nombre }}?" disabled />
+      <input [(ngModel)]="borrador" (keyup.enter)="publicar()"
+             placeholder="Que estas pensando, {{ usuarioActual.nombre }}?" />
+      <button type="button" class="publicar" (click)="publicar()" [disabled]="!borrador.trim()">
+        Publicar
+      </button>
     </div>
 
     <article class="post" *ngFor="let p of publicaciones">
-      <div class="post-head">
+      <!-- Tarjeta de usuario: click abre su perfil (igual que el buscador). -->
+      <div class="post-head clickable" (click)="verPerfil(p.perfil)">
         <span class="avatar">{{ p.iniciales }}</span>
         <div>
           <strong>{{ p.autor }}</strong>
@@ -49,9 +56,9 @@
       </div>
       <p class="post-texto">{{ p.texto }}</p>
       <div class="post-acciones">
-        <span>&#128077; {{ p.meGusta }}</span>
-        <span>&#128172; {{ p.comentarios }}</span>
-        <span>&#10150; Compartir</span>
+        <span><app-icon name="like" [size]="18" /> {{ p.meGusta }}</span>
+        <span><app-icon name="comment" [size]="18" /> {{ p.comentarios }}</span>
+        <span><app-icon name="share" [size]="18" /> Compartir</span>
       </div>
     </article>
   </main>
@@ -59,18 +66,21 @@
   <!-- Sidebar derecho -->
   <aside class="col derecha">
     <div class="caja">
-      <h3>&#127874; Cumpleaños</h3>
+      <h3><app-icon name="cake" [size]="18" /> Cumpleaños</h3>
       <ul>
-        <li *ngFor="let c of cumpleanos">{{ c }}</li>
+        <!-- Real: usuarios que cumplen hoy (CU-15). Click -> perfil. -->
+        <li *ngFor="let u of cumpleanos" class="cumple-item" (click)="verPerfilCumple(u)">
+          {{ u.nombre }} {{ u.apellido }} cumple hoy
+        </li>
+        <li *ngIf="cumpleanos.length === 0" class="vacio">Nadie cumple años hoy</li>
       </ul>
     </div>
     <div class="caja">
       <h3>Contactos</h3>
       <ul class="contactos">
-        <li *ngFor="let c of contactos; let i = index">
-          <a [routerLink]="['/chat', i + 1]" [queryParams]="{ nombre: c }">
-            <span class="dot"></span>{{ c }}
-          </a>
+        <!-- Tarjeta de usuario: click abre su perfil (igual que el buscador). -->
+        <li *ngFor="let c of contactos" (click)="verPerfil(c)">
+          <span class="dot"></span>{{ c.nombre }}
         </li>
       </ul>
     </div>

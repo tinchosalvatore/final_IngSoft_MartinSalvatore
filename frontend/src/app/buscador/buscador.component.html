@@ -2,33 +2,47 @@
   <a routerLink="/" class="volver">&larr; Volver al inicio</a>
 
   <h1>Buscar usuarios</h1>
-  <p class="sub">
-    Personas que quizas conozcas (con amigos en comun) &middot;
-    <a routerLink="/registro">Crear cuenta nueva</a>
-  </p>
 
-  <div class="controles">
-    <label>
-      Minimo de amigos en comun:
-      <input type="number" min="1" [(ngModel)]="minAmigos" />
-    </label>
-    <button (click)="buscar()" [disabled]="buscando">
-      {{ buscando ? 'Buscando...' : 'Buscar' }}
+  <!-- Searchbar: escribe y busca los usuarios creados por nombre o apellido. -->
+  <div class="searchbar">
+    <app-icon name="search" [size]="18" />
+    <input type="text" [(ngModel)]="query" (ngModelChange)="alEscribir()"
+           placeholder="Busca a un usuario por nombre..." autocomplete="off" />
+  </div>
+
+  <!-- Titulo de la lista: sugerencias del CU-13 vs resultados de la busqueda. -->
+  <div class="sub-row">
+    <p class="sub">
+      <ng-container *ngIf="!modoBusqueda">
+        Personas que quizas conozcas (con 2+ amigos en comun)
+      </ng-container>
+      <ng-container *ngIf="modoBusqueda">
+        Resultados para &ldquo;{{ query }}&rdquo;
+      </ng-container>
+    </p>
+
+    <!-- CU-13: recarga la lista trayendo un usuario mas con +2 amigos en comun. -->
+    <button type="button" class="recargar" *ngIf="!modoBusqueda"
+            (click)="recargarSugerencias()" [disabled]="recargando">
+      <app-icon name="people" [size]="16" />
+      {{ recargando ? 'Recargando...' : 'Recargar sugerencias' }}
     </button>
   </div>
 
-  <ul class="resultados" *ngIf="usuarios.length > 0">
-    <li *ngFor="let u of usuarios" class="card">
+  <p class="estado" *ngIf="buscando">Buscando...</p>
+
+  <ul class="resultados" *ngIf="!buscando && usuarios.length > 0">
+    <li *ngFor="let u of usuarios" class="card" (click)="verPerfil(u)">
       <div class="avatar">{{ u.nombre.charAt(0) }}{{ u.apellido.charAt(0) }}</div>
       <div class="info">
         <strong>{{ u.nombre }} {{ u.apellido }}</strong>
         <span class="user">&#64;{{ u.nombreUsuario }}</span>
-        <span class="comun">{{ u.amigosEnComun }} amigos en comun</span>
+        <span class="comun" *ngIf="u.amigosEnComun > 0">{{ u.amigosEnComun }} amigos en comun</span>
       </div>
     </li>
   </ul>
 
-  <p class="vacio" *ngIf="yaBusco && !buscando && usuarios.length === 0">
-    {{ mensaje || 'No se encontraron usuarios' }}
+  <p class="vacio" *ngIf="!buscando && usuarios.length === 0">
+    {{ modoBusqueda ? 'No se encontraron usuarios' : 'No hay personas sugeridas por ahora' }}
   </p>
 </section>

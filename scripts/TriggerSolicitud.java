@@ -4,8 +4,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
- * Script de demo (CU-14): dispara una solicitud de amistad desde el back para que
- * la UI muestre el toast en vivo.
+ * Script de demo (CU-14): envia una solicitud de amistad REAL contra el endpoint de dominio
+ * (POST /solicitudes). El backend la persiste y publica un evento; el subsistema de
+ * notificaciones reacciona y la UI muestra el toast en vivo. No hay "trigger" de notificacion:
+ * la notificacion ocurre porque pasa el hecho real.
  *
  * Uso (Java 21, single-file, no requiere compilar):
  *   java scripts/TriggerSolicitud.java
@@ -19,7 +21,7 @@ public class TriggerSolicitud {
     private static final String BASE = "http://localhost:8080";
 
     public static void main(String[] args) throws Exception {
-        String url = BASE + "/dev/trigger-solicitud";
+        String url = BASE + "/solicitudes";
         if (args.length >= 2) {
             url += "?remitenteId=" + args[0] + "&destinatarioId=" + args[1];
         } else if (args.length == 1) {
@@ -37,7 +39,7 @@ public class TriggerSolicitud {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("HTTP " + response.statusCode());
             System.out.println(response.body());
-            if (response.statusCode() == 200) {
+            if (response.statusCode() / 100 == 2) {
                 System.out.println(">> Mira la UI: deberia aparecer el toast de solicitud de amistad.");
             }
         } catch (Exception e) {

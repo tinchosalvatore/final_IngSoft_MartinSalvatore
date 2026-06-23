@@ -1,12 +1,14 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.UsuarioDTO;
+import com.um.umbook.exception.UsuarioNotFoundException;
 import com.um.umbook.exception.UsuarioYaExisteException;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -20,13 +22,47 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final AmistadService amistadService;
+    private final CumpleanosService cumpleanosService;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository, AmistadService amistadService,
-                          PasswordEncoder passwordEncoder) {
+                          CumpleanosService cumpleanosService, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.amistadService = amistadService;
+        this.cumpleanosService = cumpleanosService;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    /**
+     * Edita la fecha de nacimiento de un usuario para que su dia/mes sea HOY (conserva el año).
+     * Es una accion real de perfil que la demo usa para elegir el cumpleañero antes de correr
+     * el batch (CU-15). Devuelve el usuario actualizado.
+     */
+    public UsuarioDTO marcarCumpleanosHoy(Long id) {
+        Usuario usuario = obtenerPorId(id);
+        if (usuario == null) {
+            throw new UsuarioNotFoundException("Usuario " + id + " no encontrado");
+        }
+        int anio = usuario.getFechaNacimiento() != null ? usuario.getFechaNacimiento().getYear() : 2000;
+        LocalDate hoy = LocalDate.now();
+        usuario.setFechaNacimiento(LocalDate.of(anio, hoy.getMonth(), hoy.getDayOfMonth()));
+        return UsuarioDTO.fromEntity(usuarioRepository.save(usuario));
+    }
+
+    /**
+     * Usuarios que cumplen años hoy (CU-15), con sus amigos en comun con la referencia.
+     * Lo consume la tarjeta de Cumpleaños del home, que se actualiza con quienes cumplen.
+     */
+    public List<UsuarioDTO> cumpleanosDeHoy(Usuario referencia) {
+        List<UsuarioDTO> resultado = new ArrayList<>();
+        for (Usuario u : cumpleanosService.obtenerUsuariosConCumpleanos()) {
+            if (u.getId().equals(referencia.getId())) {
+                continue; // no me muestro a mi mismo
+            }
+            int comunes = amistadService.obtenerAmigosEnComun(referencia, u).size();
+            resultado.add(UsuarioDTO.fromEntity(u, comunes));
+        }
+        return resultado;
     }
 
     public Usuario obtenerPorId(Long id) {
@@ -49,10 +85,87 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    /** Cantidad de sugerencias que devuelve cada recarga (de a dos). */
+    private static final int EXTRAS_POR_RECARGA = 2;
+
+    /**
+     * Pool de extras que el boton "recargar sugerencias" va creando. Cada recarga toma el
+     * siguiente lote de {@link #EXTRAS_POR_RECARGA} que aun no existan. Cuando no quedan
+     * suficientes para completar un lote, no hay mas para sugerir.
+     * {nombre, apellido, email, nombreUsuario, mesNac, diaNac}.
+     */
+    private static final String[][] EXTRAS_DEMO = {
+            {"Lucas", "Pereyra", "lucas@um.edu.ar", "lucas", "6", "15"},
+            {"Sofia", "Romero", "sofia@um.edu.ar", "sofia", "10", "3"},
+            {"Mateo", "Funes", "mateo@um.edu.ar", "mateo", "2", "21"},
+            {"Valentina", "Costa", "valentina@um.edu.ar", "valentina", "8", "9"},
+    };
+
+    /**
+     * Demo del boton "recargar sugerencias" (CU-13): agrega un lote de DOS usuarios nuevos con
+     * +2 amigos en comun con la referencia (enlazados a 2 amigos directos suyos). Devuelve solo
+     * el lote nuevo, asi el front reemplaza la lista y deja de mostrar los previos. Cuando ya
+     * no quedan extras por crear, lanza {@link UsuarioNotFoundException} (alt "Lista vacia"
+     * del diagrama) que el front muestra como notificacion de excepcion.
+     */
+    public List<UsuarioDTO> agregarSugerenciaExtra(Usuario referencia) {
+        List<String[]> lote = new ArrayList<>();
+        for (String[] candidato : EXTRAS_DEMO) {
+            if (usuarioRepository.findByNombreUsuario(candidato[3]) == null) {
+                lote.add(candidato);
+                if (lote.size() == EXTRAS_POR_RECARGA) {
+                    break;
+                }
+            }
+        }
+        if (lote.size() < EXTRAS_POR_RECARGA) {
+            throw new UsuarioNotFoundException("No hay mas usuarios con +2 amigos en comun para sugerir");
+        }
+
+        List<Usuario> amigosReferencia = amistadService.obtenerAmigos(referencia);
+        if (amigosReferencia.size() < 2) {
+            throw new UsuarioNotFoundException("La referencia no tiene suficientes amigos para generar la sugerencia");
+        }
+
+        List<UsuarioDTO> resultado = new ArrayList<>();
+        for (String[] datos : lote) {
+            LocalDate nacimiento = LocalDate.of(2000, Integer.parseInt(datos[4]), Integer.parseInt(datos[5]));
+            Usuario extra = new Usuario(datos[0], datos[1], datos[2], datos[3],
+                    passwordEncoder.encode("demo1234"), nacimiento);
+            extra.setActivo(true);
+            extra = usuarioRepository.save(extra);
+
+            // Lo hago amigo de 2 amigos directos de la referencia => 2 amigos en comun.
+            amistadService.crearAmistad(extra, amigosReferencia.get(0));
+            amistadService.crearAmistad(extra, amigosReferencia.get(1));
+
+            int comunes = amistadService.obtenerAmigosEnComun(referencia, extra).size();
+            resultado.add(UsuarioDTO.fromEntity(extra, comunes));
+        }
+        return resultado;
+    }
+
     /** Busqueda por texto (nombre o apellido) usada por la searchbar. */
     public List<Usuario> buscarUsuarios(String nombre, String apellido) {
         return usuarioRepository
                 .findByNombreContainingIgnoreCaseOrApellidoContainingIgnoreCase(nombre, apellido);
+    }
+
+    /**
+     * Busqueda de la searchbar: usuarios cuyo nombre o apellido contiene {@code texto},
+     * excluyendo al propio usuario de referencia. Cada resultado incluye cuantos amigos en
+     * comun tiene con la referencia (para mostrarlo en la tarjeta, igual que la sugerencia).
+     */
+    public List<UsuarioDTO> buscarPorTexto(Usuario referencia, String texto) {
+        List<UsuarioDTO> resultado = new ArrayList<>();
+        for (Usuario candidato : buscarUsuarios(texto, texto)) {
+            if (candidato.getId().equals(referencia.getId())) {
+                continue; // no me muestro a mi mismo
+            }
+            int comunes = amistadService.obtenerAmigosEnComun(referencia, candidato).size();
+            resultado.add(UsuarioDTO.fromEntity(candidato, comunes));
+        }
+        return resultado;
     }
 
     /**

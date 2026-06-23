@@ -1,7 +1,9 @@
 # Scripts de demo
 
-Disparan las notificaciones desde el back para verlas llegar en vivo a la UI.
-Son archivos Java de un solo fichero (Java 21+), no requieren compilar.
+Provocan los **hechos reales** del dominio contra los endpoints de la app; la notificacion
+en vivo aparece como **reaccion** a esos hechos (evento de dominio → listener → toast SSE),
+no como un disparo directo de notificacion. Son archivos Java de un solo fichero (Java 21+),
+no requieren compilar.
 
 Requisitos: backend corriendo en `http://localhost:8080` y la UI abierta en
 `http://localhost:4200` (logueado/observando como `martin`, id=1).
@@ -14,15 +16,19 @@ java scripts/TriggerSolicitud.java
 java scripts/TriggerSolicitud.java 7 1
 ```
 
-Default: `fede` (id=7) envia solicitud a `martin` (id=1) → toast en vivo.
+Hace `POST /solicitudes` (envio real). Default: `fede` (id=7) envia solicitud a `martin`
+(id=1). El backend la persiste y publica el evento → el listener emite el toast en vivo.
 
 ## CU-15 — Cumpleaños
 
 ```bash
 java scripts/TriggerCumple.java
-# o indicando el usuario cumpleañero:
+# o eligiendo el cumpleañero (edita su cumple a hoy y corre el batch):
 java scripts/TriggerCumple.java 3
 ```
 
-Default: setea el cumpleaños de `beto` (id=3) a HOY y corre el batch → toast en vivo
-para sus amigos (martin entre ellos).
+Hace `POST /cumpleanos/ejecutar-batch` (el batch diario real). El batch detecta quienes
+cumplen hoy y publica un evento por cada uno → el listener avisa a sus amigos. Sin argumentos
+notifica por quienes ya cumplen hoy (el seed deja a `ana` cumpliendo hoy). Con `<usuarioId>`
+primero hace `PUT /usuarios/{id}/cumpleanos` (edita el cumple a hoy, accion real de perfil)
+y despues corre el batch.

@@ -28,6 +28,10 @@
   border-left-color: #e8a317;
 }
 
+.toast.error {
+  border-left-color: #e03e3e;
+}
+
 @keyframes entrar {
   from { transform: translateX(110%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }

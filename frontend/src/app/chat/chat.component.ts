@@ -26,6 +26,10 @@ export class ChatComponent implements OnInit {
   borrador = '';
   mensajes: Mensaje[] = [];
 
+  private esCumple = false;
+  /** true una vez que el amigo agradecio (asi no repite la respuesta de cumple). */
+  private agradecio = false;
+
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
@@ -37,13 +41,13 @@ export class ChatComponent implements OnInit {
       .slice(0, 2)
       .toUpperCase();
 
-    const esCumple = this.route.snapshot.queryParamMap.get('cumple') === '1';
+    this.esCumple = this.route.snapshot.queryParamMap.get('cumple') === '1';
     this.mensajes = [
       { de: 'otro', texto: `Hola! Soy ${this.amigo}` },
-      { de: 'otro', texto: esCumple ? 'Gracias por acordarte de mi cumple! 🎂' : 'Como va todo?' }
+      { de: 'otro', texto: 'Como va todo?' }
     ];
-    if (esCumple) {
-      this.borrador = `Feliz cumple, ${this.amigo}! 🎉`;
+    if (this.esCumple) {
+      this.borrador = `Feliz cumple, ${this.amigo}!`;
     }
   }
 
@@ -54,5 +58,13 @@ export class ChatComponent implements OnInit {
     }
     this.mensajes = [...this.mensajes, { de: 'yo', texto }];
     this.borrador = '';
+
+    // Demo de cumple: el amigo agradece recien despues de enviar el saludo.
+    if (this.esCumple && !this.agradecio) {
+      this.agradecio = true;
+      setTimeout(() => {
+        this.mensajes = [...this.mensajes, { de: 'otro', texto: 'Gracias por acordarte de mi cumple!' }];
+      }, 800);
+    }
   }
 }

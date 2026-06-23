@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { IconComponent } from '../icon/icon.component';
 import { Notificacion } from '../models/notificacion';
 import { NotificacionService } from '../services/notificacion.service';
 
@@ -17,7 +18,7 @@ interface ToastVisible extends Notificacion {
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.css'
 })
@@ -49,10 +50,22 @@ export class ToastComponent implements OnInit, OnDestroy {
   }
 
   icono(tipo: string): string {
-    return tipo === 'CUMPLEANOS' ? '\u{1F382}' : '\u{1F465}';
+    if (tipo === 'CUMPLEANOS') return 'cake';
+    if (tipo === 'ERROR') return 'bell';
+    return 'people';
+  }
+
+  titulo(tipo: string): string {
+    if (tipo === 'CUMPLEANOS') return 'Cumpleaños';
+    if (tipo === 'ERROR') return 'Aviso';
+    return 'Solicitud de amistad';
   }
 
   alClickear(toast: ToastVisible): void {
+    if (toast.tipo === 'ERROR') {
+      this.cerrar(toast.uid);
+      return;
+    }
     if (toast.tipo === 'SOLICITUD_AMISTAD') {
       this.router.navigate(['/solicitudes']);
     } else if (toast.tipo === 'CUMPLEANOS') {

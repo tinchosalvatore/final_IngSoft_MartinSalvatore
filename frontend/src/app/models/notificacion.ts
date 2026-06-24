@@ -15,4 +15,6 @@ export interface SolicitudAmistad {
   remitenteUsuario: string;
   estado: string;
   fechaEnvio: string;
+  /** Token de email: se usa para aceptar/rechazar (flujo por token del diagrama de clases). */
+  tokenEmail: string;
 }

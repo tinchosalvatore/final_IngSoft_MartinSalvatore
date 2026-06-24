@@ -4,6 +4,7 @@ import com.um.umbook.model.Amistad;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.AmistadRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,5 +44,15 @@ public class AmistadService {
 
     public Amistad crearAmistad(Usuario u1, Usuario u2) {
         return amistadRepository.save(new Amistad(u1, u2));
+    }
+
+    /**
+     * Elimina la amistad entre dos usuarios. El par es no ordenado, asi que borra ambos sentidos.
+     * Metodo 1:1 con el diagrama de clases.
+     */
+    @Transactional
+    public void eliminarAmistad(Usuario u1, Usuario u2) {
+        amistadRepository.deleteByUsuario1AndUsuario2(u1, u2);
+        amistadRepository.deleteByUsuario1AndUsuario2(u2, u1);
     }
 }

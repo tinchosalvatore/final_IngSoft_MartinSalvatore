@@ -9,7 +9,6 @@ import com.um.umbook.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,8 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Endpoints de solicitudes de amistad (CU-14). El envio real (POST /solicitudes) dispara la
- * notificacion en vivo via evento de dominio; el click en la notificacion lista las pendientes.
+ * Endpoints de solicitudes de amistad (CU-14). El envio real (POST /solicitudes) notifica en vivo
+ * al destinatario por llamada directa; aceptar/rechazar resuelven por token de email (1:1 con el
+ * diagrama de clases). El click en la notificacion lista las pendientes.
  */
 @RestController
 @RequestMapping("/solicitudes")
@@ -39,11 +39,12 @@ public class SolicitudAmistadController {
     }
 
     /**
-     * CU-14: envia una solicitud de amistad de verdad. Persiste la solicitud y publica el
-     * evento de dominio -> el listener de notificaciones emite el toast en vivo al destinatario.
+     * CU-14: envia una solicitud de amistad de verdad. Persiste la solicitud y notifica en vivo
+     * al destinatario (toast SSE) por llamada directa. El param remitenteId es EXTRA de demo
+     * (ver docs/EXTRAS.md); el diagrama solo recibe destinatarioId.
      */
     @PostMapping
-    public ResponseEntity<SolicitudAmistadDTO> enviar(
+    public ResponseEntity<SolicitudAmistadDTO> enviarSolicitud(
             @RequestParam(name = "remitenteId", required = false) Long remitenteId,
             @RequestParam(name = "destinatarioId", required = false) Long destinatarioId) {
 
@@ -72,15 +73,15 @@ public class SolicitudAmistadController {
         return ResponseEntity.ok(solicitudService.obtenerPendientes(usuario));
     }
 
-    @PostMapping("/{id}/aceptar")
-    public ResponseEntity<Map<String, String>> aceptar(@PathVariable Long id) {
-        solicitudService.aceptarSolicitud(id);
+    @PostMapping("/aceptar")
+    public ResponseEntity<Map<String, String>> aceptarSolicitud(@RequestParam("token") String token) {
+        solicitudService.aceptarSolicitud(token);
         return ResponseEntity.ok(Map.of("mensaje", "Solicitud aceptada"));
     }
 
-    @PostMapping("/{id}/rechazar")
-    public ResponseEntity<Map<String, String>> rechazar(@PathVariable Long id) {
-        solicitudService.rechazarSolicitud(id);
+    @PostMapping("/rechazar")
+    public ResponseEntity<Map<String, String>> rechazarSolicitud(@RequestParam("token") String token) {
+        solicitudService.rechazarSolicitud(token);
         return ResponseEntity.ok(Map.of("mensaje", "Solicitud rechazada"));
     }
 }

@@ -20,6 +20,8 @@ public interface AmistadRepository extends JpaRepository<Amistad, Long> {
 
     List<Amistad> findByUsuario1OrUsuario2(Usuario usuario1, Usuario usuario2);
 
+    void deleteByUsuario1AndUsuario2(Usuario usuario1, Usuario usuario2);
+
     /**
      * Amigos en comun entre dos usuarios: usuarios que son amigos de u1 y tambien de u2.
      */

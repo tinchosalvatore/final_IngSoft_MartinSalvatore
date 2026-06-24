@@ -25,7 +25,8 @@ public class CumpleanosController {
 
     @PostMapping("/ejecutar-batch")
     public ResponseEntity<Map<String, Object>> ejecutarBatch() {
-        int cumpleaneros = cumpleanosService.ejecutarBatchDiario();
+        cumpleanosService.ejecutarBatchDiario();
+        int cumpleaneros = cumpleanosService.obtenerUsuariosConCumpleanos().size();
         return ResponseEntity.ok(Map.of(
                 "cumpleaneros", cumpleaneros,
                 "mensaje", "Batch de cumpleaños ejecutado: " + cumpleaneros + " cumpleañero(s) hoy"));

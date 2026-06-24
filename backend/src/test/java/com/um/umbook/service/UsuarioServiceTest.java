@@ -50,16 +50,12 @@ class UsuarioServiceTest {
     @Test
     void listarConAmigosEnComun_listaUsuariosConDosOMasAmigosEnComun() {
         Usuario ref = usuario(1L, "jperez");
-        Usuario amigoDirecto = usuario(2L, "directo");
         Usuario candidatoA = usuario(3L, "candidatoA"); // 2 en comun -> aparece
-        Usuario candidatoB = usuario(4L, "candidatoB"); // 1 en comun -> NO aparece
 
-        when(amistadService.obtenerAmigos(ref)).thenReturn(List.of(amigoDirecto));
-        when(usuarioRepository.findAll()).thenReturn(List.of(ref, amigoDirecto, candidatoA, candidatoB));
+        // El filtrado pesado (≥2 + exclusiones) lo hace el repositorio (1:1 con el diagrama).
+        when(usuarioRepository.findUsuariosConAmigosEnComun(ref)).thenReturn(List.of(candidatoA));
         when(amistadService.obtenerAmigosEnComun(ref, candidatoA))
                 .thenReturn(List.of(usuario(8L, "x"), usuario(9L, "y")));
-        when(amistadService.obtenerAmigosEnComun(ref, candidatoB))
-                .thenReturn(List.of(usuario(8L, "x")));
 
         List<UsuarioDTO> resultado = usuarioService.listarConAmigosEnComun(ref, 2);
 
@@ -72,11 +68,9 @@ class UsuarioServiceTest {
     @Test
     void listarConAmigosEnComun_devuelveVacioCuandoNadieCalifica() {
         Usuario ref = usuario(1L, "jperez");
-        Usuario candidato = usuario(3L, "candidato"); // solo 1 en comun
 
-        when(amistadService.obtenerAmigos(ref)).thenReturn(List.of());
-        when(usuarioRepository.findAll()).thenReturn(List.of(ref, candidato));
-        when(amistadService.obtenerAmigosEnComun(ref, candidato)).thenReturn(List.of(usuario(8L, "x")));
+        // El repositorio no devuelve candidatos con +2 amigos en comun.
+        when(usuarioRepository.findUsuariosConAmigosEnComun(ref)).thenReturn(List.of());
 
         List<UsuarioDTO> resultado = usuarioService.listarConAmigosEnComun(ref, 2);
 

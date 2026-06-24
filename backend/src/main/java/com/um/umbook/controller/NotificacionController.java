@@ -2,6 +2,7 @@ package com.um.umbook.controller;
 
 import com.um.umbook.dto.NotificacionDTO;
 import com.um.umbook.exception.UsuarioNotFoundException;
+import com.um.umbook.model.TipoNotificacion;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.service.NotificacionService;
 import com.um.umbook.service.UsuarioService;
@@ -47,7 +48,19 @@ public class NotificacionController {
         if (usuario == null) {
             throw new UsuarioNotFoundException("Usuario no encontrado");
         }
-        return ResponseEntity.ok(notificacionService.obtenerNoLeidas(usuario));
+        List<NotificacionDTO> dtos = notificacionService.obtenerNoLeidas(usuario).stream()
+                .map(n -> NotificacionDTO.fromEntity(n, mensajeGenerico(n.getTipo())))
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /** Mensaje generico para la lista de no leidas (el toast en vivo lleva el detallado). */
+    private String mensajeGenerico(TipoNotificacion tipo) {
+        return switch (tipo) {
+            case SOLICITUD_AMISTAD -> "Tenes una solicitud de amistad pendiente";
+            case CUMPLEANOS -> "Un amigo cumple años hoy";
+            default -> "Nueva notificacion";
+        };
     }
 
     @PutMapping("/{id}/leida")

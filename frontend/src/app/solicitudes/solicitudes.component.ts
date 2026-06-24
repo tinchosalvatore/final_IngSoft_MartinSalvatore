@@ -40,14 +40,14 @@ export class SolicitudesComponent implements OnInit {
   }
 
   aceptar(s: SolicitudAmistad): void {
-    this.notificacionService.aceptarSolicitud(s.id).subscribe(() => {
+    this.notificacionService.aceptarSolicitud(s.tokenEmail).subscribe(() => {
       this.quitar(s);
       this.aviso = `Ahora sos amigo de ${s.remitenteNombre}`;
     });
   }
 
   rechazar(s: SolicitudAmistad): void {
-    this.notificacionService.rechazarSolicitud(s.id).subscribe(() => {
+    this.notificacionService.rechazarSolicitud(s.tokenEmail).subscribe(() => {
       this.quitar(s);
       this.aviso = `Rechazaste la solicitud de ${s.remitenteNombre}`;
     });

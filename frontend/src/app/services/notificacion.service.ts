@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { API_URL } from '../api';
@@ -53,12 +53,14 @@ export class NotificacionService {
     return this.http.get<SolicitudAmistad[]>(`${API_URL}/solicitudes/pendientes`);
   }
 
-  aceptarSolicitud(id: number): Observable<unknown> {
-    return this.http.post(`${API_URL}/solicitudes/${id}/aceptar`, {});
+  aceptarSolicitud(token: string): Observable<unknown> {
+    const params = new HttpParams().set('token', token);
+    return this.http.post(`${API_URL}/solicitudes/aceptar`, {}, { params });
   }
 
-  rechazarSolicitud(id: number): Observable<unknown> {
-    return this.http.post(`${API_URL}/solicitudes/${id}/rechazar`, {});
+  rechazarSolicitud(token: string): Observable<unknown> {
+    const params = new HttpParams().set('token', token);
+    return this.http.post(`${API_URL}/solicitudes/rechazar`, {}, { params });
   }
 
   /** Notificaciones no leidas (para el contador de la campana). */

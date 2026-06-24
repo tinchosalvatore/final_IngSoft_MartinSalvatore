@@ -15,6 +15,8 @@ public class SolicitudAmistadDTO {
     private String remitenteUsuario;
     private EstadoSolicitud estado;
     private LocalDateTime fechaEnvio;
+    /** Token de email: el front lo usa para aceptar/rechazar (flujo por token del diagrama). */
+    private String tokenEmail;
 
     public SolicitudAmistadDTO() {
     }
@@ -26,11 +28,16 @@ public class SolicitudAmistadDTO {
         dto.remitenteUsuario = s.getRemitente().getNombreUsuario();
         dto.estado = s.getEstado();
         dto.fechaEnvio = s.getFechaEnvio();
+        dto.tokenEmail = s.getTokenEmail();
         return dto;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getTokenEmail() {
+        return tokenEmail;
     }
 
     public String getRemitenteNombre() {

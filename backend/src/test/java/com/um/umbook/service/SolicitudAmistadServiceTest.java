@@ -1,29 +1,29 @@
 package com.um.umbook.service;
 
-import com.um.umbook.event.SolicitudAmistadCreadaEvent;
 import com.um.umbook.model.EstadoSolicitud;
 import com.um.umbook.model.SolicitudAmistad;
+import com.um.umbook.model.TipoNotificacion;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.SolicitudAmistadRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests de SolicitudAmistadService. Tras el refactor a eventos, enviar una solicitud la
- * persiste y publica el evento de dominio (la notificacion/email los hace el listener).
- * Cubre CP 8.2.1 (publica el evento al enviarse) y el aceptar/rechazar.
+ * Tests de SolicitudAmistadService. Tras el refactor a llamada directa (1:1 con el diagrama),
+ * enviar una solicitud la persiste y notifica al destinatario llamando directo a mailService y
+ * notificacionService. Cubre CP 8.2.1 (se crea la notificacion al enviarse) y aceptar/rechazar
+ * por token.
  */
 @ExtendWith(MockitoExtension.class)
 class SolicitudAmistadServiceTest {
@@ -33,7 +33,9 @@ class SolicitudAmistadServiceTest {
     @Mock
     private AmistadService amistadService;
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private NotificacionService notificacionService;
+    @Mock
+    private JavaMailService mailService;
 
     @InjectMocks
     private SolicitudAmistadService solicitudService;
@@ -46,7 +48,7 @@ class SolicitudAmistadServiceTest {
 
     // ---------- CP 8.2.1 ----------
     @Test
-    void enviarSolicitud_persisteYPublicaEvento() {
+    void enviarSolicitud_persisteYNotificaAlDestinatario() {
         Usuario remitente = usuario(1L, "Juan", "Sanchez");
         Usuario destinatario = usuario(2L, "Juan", "Perez");
         when(solicitudRepository.save(any(SolicitudAmistad.class))).thenAnswer(inv -> {
@@ -57,13 +59,10 @@ class SolicitudAmistadServiceTest {
 
         solicitudService.enviarSolicitud(remitente, destinatario);
 
-        // Se publica el evento de dominio con la solicitud persistida (el listener notifica).
-        ArgumentCaptor<SolicitudAmistadCreadaEvent> captor =
-                ArgumentCaptor.forClass(SolicitudAmistadCreadaEvent.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-        SolicitudAmistad solicitud = captor.getValue().getSolicitud();
-        assertThat(solicitud.getId()).isEqualTo(99L);
-        assertThat(solicitud.getDestinatario()).isEqualTo(destinatario);
+        // Email + notificacion en vivo por llamada directa (sin eventos).
+        verify(mailService).enviarEmailSolicitudAmistad(any(SolicitudAmistad.class));
+        verify(notificacionService).crearNotificacion(eq(destinatario),
+                eq(TipoNotificacion.SOLICITUD_AMISTAD), eq(99L), any(String.class));
     }
 
     @Test
@@ -72,9 +71,9 @@ class SolicitudAmistadServiceTest {
         Usuario destinatario = usuario(2L, "Juan", "Perez");
         SolicitudAmistad solicitud = new SolicitudAmistad(remitente, destinatario, "tok");
         solicitud.setId(99L);
-        when(solicitudRepository.findById(99L)).thenReturn(java.util.Optional.of(solicitud));
+        when(solicitudRepository.findByTokenEmail("tok")).thenReturn(solicitud);
 
-        solicitudService.aceptarSolicitud(99L);
+        solicitudService.aceptarSolicitud("tok");
 
         assertThat(solicitud.getEstado()).isEqualTo(EstadoSolicitud.ACEPTADA);
         verify(solicitudRepository).save(solicitud);
@@ -87,11 +86,11 @@ class SolicitudAmistadServiceTest {
         Usuario destinatario = usuario(2L, "Juan", "Perez");
         SolicitudAmistad solicitud = new SolicitudAmistad(remitente, destinatario, "tok");
         solicitud.setId(99L);
-        when(solicitudRepository.findById(99L)).thenReturn(java.util.Optional.of(solicitud));
-        when(solicitudRepository.save(solicitud)).thenReturn(solicitud);
+        when(solicitudRepository.findByTokenEmail("tok")).thenReturn(solicitud);
 
-        solicitudService.rechazarSolicitud(99L);
+        solicitudService.rechazarSolicitud("tok");
 
         assertThat(solicitud.getEstado()).isEqualTo(EstadoSolicitud.RECHAZADA);
+        verify(solicitudRepository).save(solicitud);
     }
 }

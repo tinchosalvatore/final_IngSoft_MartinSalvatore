@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Logica de usuarios. Metodos 1:1 con el diagrama de clases de diseño.
@@ -147,8 +145,7 @@ public class UsuarioService {
 
     /** Busqueda por texto (nombre o apellido) usada por la searchbar. */
     public List<Usuario> buscarUsuarios(String nombre, String apellido) {
-        return usuarioRepository
-                .findByNombreContainingIgnoreCaseOrApellidoContainingIgnoreCase(nombre, apellido);
+        return usuarioRepository.findByNombreContainingOrApellidoContaining(nombre, apellido);
     }
 
     /**
@@ -169,23 +166,15 @@ public class UsuarioService {
     }
 
     /**
-     * CU-13: lista los usuarios que tienen al menos {@code minAmigos} amigos en comun con
-     * el usuario de referencia, excluyendo al propio usuario y a sus amigos directos
-     * (sugerencias del tipo "personas que quizas conozcas").
+     * CU-13: lista los usuarios con al menos {@code minAmigos} amigos en comun con la referencia,
+     * excluyendo al propio usuario y a sus amigos directos ("personas que quizas conozcas").
+     * El filtrado pesado (≥2 + exclusiones) lo hace el repositorio
+     * ({@link UsuarioRepository#findUsuariosConAmigosEnComun}, 1:1 con el diagrama); aca solo se
+     * arma el DTO con el conteo de comunes y, si {@code minAmigos>2}, se aplica el umbral extra.
      */
     public List<UsuarioDTO> listarConAmigosEnComun(Usuario referencia, int minAmigos) {
-        Set<Long> idsAmigosDirectos = amistadService.obtenerAmigos(referencia).stream()
-                .map(Usuario::getId)
-                .collect(Collectors.toSet());
-
         List<UsuarioDTO> resultado = new ArrayList<>();
-        for (Usuario candidato : usuarioRepository.findAll()) {
-            if (candidato.getId().equals(referencia.getId())) {
-                continue; // no me sugiero a mi mismo
-            }
-            if (idsAmigosDirectos.contains(candidato.getId())) {
-                continue; // ya somos amigos
-            }
+        for (Usuario candidato : usuarioRepository.findUsuariosConAmigosEnComun(referencia)) {
             int comunes = amistadService.obtenerAmigosEnComun(referencia, candidato).size();
             if (comunes >= minAmigos) {
                 resultado.add(UsuarioDTO.fromEntity(candidato, comunes));

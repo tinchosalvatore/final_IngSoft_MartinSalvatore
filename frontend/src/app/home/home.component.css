@@ -1,3 +1,18 @@
+.logout {
+  background: #e4e6eb;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1c1e21;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: #d8dadf;
+}
+
 :host {
   display: block;
   background: #f0f2f5;

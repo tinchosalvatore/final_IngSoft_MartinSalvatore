@@ -3,13 +3,15 @@ import { Injectable, NgZone } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { API_URL } from '../api';
 import { Notificacion, SolicitudAmistad } from '../models/notificacion';
+import { SesionService } from './sesion.service';
 
-/** Usuario observado en la demo (martin, sembrado con id=1). */
+/** Usuario por defecto de la demo (martin, id=1) cuando todavia no hay sesion. */
 const DEMO_USUARIO_ID = 1;
 
 /**
- * Cliente de notificaciones. Abre un EventSource (SSE) al backend y emite cada
- * notificacion que llega en vivo (CU-14 y CU-15). Tambien consulta pendientes/no-leidas.
+ * Cliente de notificaciones. Abre un EventSource (SSE) al backend para el usuario logueado
+ * (CU-2) y emite cada notificacion que llega en vivo (CU-14 y CU-15). Tambien consulta
+ * pendientes/no-leidas.
  */
 @Injectable({ providedIn: 'root' })
 export class NotificacionService {
@@ -20,19 +22,30 @@ export class NotificacionService {
   /** Stream de notificaciones entrantes (para el ToastComponent). */
   notificaciones$ = this.notificacionesSubject.asObservable();
 
-  constructor(private http: HttpClient, private zone: NgZone) {}
+  constructor(private http: HttpClient, private zone: NgZone, private sesion: SesionService) {}
 
-  /** Abre la conexion SSE (idempotente). */
+  /** Id del usuario actual: el logueado o, si no hay sesion, el demo. */
+  private usuarioActualId(): number {
+    return this.sesion.usuarioId ?? DEMO_USUARIO_ID;
+  }
+
+  /** Abre la conexion SSE (idempotente) para el usuario actual. */
   conectar(): void {
     if (this.eventSource) {
       return;
     }
-    this.eventSource = new EventSource(`${API_URL}/notificaciones/stream?usuarioId=${DEMO_USUARIO_ID}`);
+    this.eventSource = new EventSource(`${API_URL}/notificaciones/stream?usuarioId=${this.usuarioActualId()}`);
     this.eventSource.addEventListener('notificacion', (e: MessageEvent) => {
       const notificacion: Notificacion = JSON.parse(e.data);
       // EventSource corre fuera de la zona de Angular: re-entrar para disparar el render.
       this.zone.run(() => this.notificacionesSubject.next(notificacion));
     });
+  }
+
+  /** Reabre la conexion SSE con el usuario actual (tras login/logout). */
+  reconectar(): void {
+    this.desconectar();
+    this.conectar();
   }
 
   desconectar(): void {
@@ -48,9 +61,10 @@ export class NotificacionService {
     this.notificacionesSubject.next(notificacion);
   }
 
-  /** CU-14 (click en notificacion): solicitudes de amistad pendientes. */
+  /** CU-18 (gestionar solicitudes): solicitudes de amistad pendientes del usuario actual. */
   obtenerPendientes(): Observable<SolicitudAmistad[]> {
-    return this.http.get<SolicitudAmistad[]>(`${API_URL}/solicitudes/pendientes`);
+    const params = new HttpParams().set('usuarioId', this.usuarioActualId());
+    return this.http.get<SolicitudAmistad[]>(`${API_URL}/solicitudes/pendientes`, { params });
   }
 
   aceptarSolicitud(token: string): Observable<unknown> {

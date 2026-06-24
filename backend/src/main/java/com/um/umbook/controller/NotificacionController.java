@@ -58,6 +58,7 @@ public class NotificacionController {
     private String mensajeGenerico(TipoNotificacion tipo) {
         return switch (tipo) {
             case SOLICITUD_AMISTAD -> "Tenes una solicitud de amistad pendiente";
+            case SOLICITUD_ACEPTADA -> "Aceptaron tu solicitud de amistad";
             case CUMPLEANOS -> "Un amigo cumple años hoy";
             default -> "Nueva notificacion";
         };

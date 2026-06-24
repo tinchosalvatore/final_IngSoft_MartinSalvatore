@@ -1,5 +1,6 @@
 package com.um.umbook.service;
 
+import com.um.umbook.model.Amistad;
 import com.um.umbook.model.EstadoSolicitud;
 import com.um.umbook.model.SolicitudAmistad;
 import com.um.umbook.model.TipoNotificacion;
@@ -66,22 +67,28 @@ class SolicitudAmistadServiceTest {
     }
 
     @Test
-    void aceptarSolicitud_marcaAceptadaYCreaAmistad() {
+    void aceptarSolicitud_marcaAceptadaCreaAmistadYNotificaAlRemitente() {
         Usuario remitente = usuario(1L, "Juan", "Sanchez");
         Usuario destinatario = usuario(2L, "Juan", "Perez");
         SolicitudAmistad solicitud = new SolicitudAmistad(remitente, destinatario, "tok");
         solicitud.setId(99L);
         when(solicitudRepository.findByTokenEmail("tok")).thenReturn(solicitud);
+        Amistad amistad = new Amistad(remitente, destinatario);
+        amistad.setId(7L);
+        when(amistadService.crearAmistad(remitente, destinatario)).thenReturn(amistad);
 
         solicitudService.aceptarSolicitud("tok");
 
         assertThat(solicitud.getEstado()).isEqualTo(EstadoSolicitud.ACEPTADA);
         verify(solicitudRepository).save(solicitud);
         verify(amistadService).crearAmistad(remitente, destinatario);
+        // CU-18 alt 2.1: se notifica al remitente que la solicitud fue aceptada.
+        verify(notificacionService).crearNotificacion(eq(remitente),
+                eq(TipoNotificacion.SOLICITUD_ACEPTADA), eq(7L), any(String.class));
     }
 
     @Test
-    void rechazarSolicitud_marcaRechazada() {
+    void rechazarSolicitud_eliminaLaSolicitud() {
         Usuario remitente = usuario(1L, "Juan", "Sanchez");
         Usuario destinatario = usuario(2L, "Juan", "Perez");
         SolicitudAmistad solicitud = new SolicitudAmistad(remitente, destinatario, "tok");
@@ -90,7 +97,7 @@ class SolicitudAmistadServiceTest {
 
         solicitudService.rechazarSolicitud("tok");
 
-        assertThat(solicitud.getEstado()).isEqualTo(EstadoSolicitud.RECHAZADA);
-        verify(solicitudRepository).save(solicitud);
+        // CU-18 alt 3.1: rechazar = Delete del diagrama.
+        verify(solicitudRepository).delete(solicitud);
     }
 }

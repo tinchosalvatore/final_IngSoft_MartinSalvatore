@@ -42,12 +42,12 @@ implementaron por ser de otros casos de uso (login, edición de perfil, baja):
 
 | Clase | Método del diagrama | No implementado porque |
 |---|---|---|
-| `UsuarioController` | `login(credenciales: LoginDTO): ResponseEntity` | No hay autenticación (demo). Falta también `LoginDTO`. |
-| `UsuarioController` | `editarPerfil(id, datos): ResponseEntity` | Fuera de CU-13/14/15. |
-| `UsuarioService` | `iniciarSesion(email, contrasena): Usuario` | Sin login en la demo. |
+| `UsuarioController` | `editarPerfil(id, datos): ResponseEntity` | Fuera de alcance (CU edición de perfil). |
 | `UsuarioService` | `editarPerfil(id, datos): Usuario` | Fuera de alcance. |
-| `UsuarioService` | `deshabilitarUsuario(id): void` | Es del subsistema Admin. |
+| `UsuarioService` | `deshabilitarUsuario(id): void` | Es del subsistema Admin (CU-5). El login (CU-2) ya bloquea cuentas vía `activo=false`, pero la baja administrativa explícita sigue pendiente. |
+
+> Ya implementados (antes pendientes): `UsuarioController.login(LoginDTO)`, `UsuarioService.iniciarSesion(email, contrasena)` y `LoginDTO` (CU-2 Iniciar Sesión).
 
 ## DTOs faltantes
 
-- `LoginDTO` (lo usa `UsuarioController.login`).
+- (ninguno pendiente de los CU implementados). `LoginDTO` ya está implementado para CU-2.

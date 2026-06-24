@@ -10,15 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Logica de amistades. Metodos 1:1 con el diagrama de clases de diseño.
+ * Logica de amistades. Campos y metodos 1:1 con el diagrama de clases de diseño.
  */
 @Service
 public class AmistadService {
 
     private final AmistadRepository amistadRepository;
+    /** Declarado por el diagrama de clases (AmistadService -> NotificacionService). Aun sin uso. */
+    private final NotificacionService notificacionService;
 
-    public AmistadService(AmistadRepository amistadRepository) {
+    public AmistadService(AmistadRepository amistadRepository, NotificacionService notificacionService) {
         this.amistadRepository = amistadRepository;
+        this.notificacionService = notificacionService;
     }
 
     /** Amigos de un usuario (el otro extremo de cada amistad, sin importar el orden del par). */

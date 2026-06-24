@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IconComponent } from '../icon/icon.component';
 import { Usuario } from '../models/usuario';
+import { NotificacionService } from '../services/notificacion.service';
+import { SesionService } from '../services/sesion.service';
 import { UsuarioService } from '../services/usuario.service';
 
 interface Publicacion {
@@ -39,10 +41,11 @@ interface PerfilLink {
 })
 export class HomeComponent implements OnInit {
 
-  usuarioActual = { nombre: 'Martin', iniciales: 'MS' };
+  /** Usuario logueado (CU-2), para el encabezado y sus propias publicaciones. */
+  usuarioActual = { nombre: 'Usuario', iniciales: 'U' };
 
-  /** Perfil del usuario actual (martin, id=1), para enlazar sus propias publicaciones. */
-  private readonly perfilActual: PerfilLink = { id: 1, nombre: 'Martin Salvatore', usuario: 'martin', amigos: 0 };
+  /** Perfil del usuario actual (logueado), para enlazar sus propias publicaciones. */
+  private perfilActual: PerfilLink = { id: 0, nombre: 'Usuario', usuario: 'usuario', amigos: 0 };
 
   /** Texto del cuadro "Que estas pensando". */
   borrador = '';
@@ -81,13 +84,37 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  constructor(private usuarioService: UsuarioService, private router: Router) {}
+  constructor(
+    private usuarioService: UsuarioService,
+    private sesion: SesionService,
+    private notificacionService: NotificacionService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    const u = this.sesion.usuarioActual;
+    if (u) {
+      const iniciales = (u.nombre.charAt(0) + u.apellido.charAt(0)).toUpperCase();
+      this.usuarioActual = { nombre: u.nombre, iniciales };
+      this.perfilActual = {
+        id: u.id,
+        nombre: `${u.nombre} ${u.apellido}`,
+        usuario: u.nombreUsuario,
+        amigos: 0
+      };
+    }
+
     this.usuarioService.cumpleanosDeHoy().subscribe({
       next: (data) => (this.cumpleanos = data),
       error: () => (this.cumpleanos = [])
     });
+  }
+
+  /** Cierra la sesion (CU-2): limpia la sesion, corta el SSE y vuelve al login. */
+  cerrarSesion(): void {
+    this.sesion.cerrarSesion();
+    this.notificacionService.desconectar();
+    this.router.navigate(['/login']);
   }
 
   /**

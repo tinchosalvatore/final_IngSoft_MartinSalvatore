@@ -1,5 +1,6 @@
 package com.um.umbook.controller;
 
+import com.um.umbook.dto.LoginDTO;
 import com.um.umbook.dto.RegistroDTO;
 import com.um.umbook.dto.UsuarioDTO;
 import com.um.umbook.exception.UsuarioNotFoundException;
@@ -20,16 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Endpoints de usuarios. CU-13: GET /usuarios?amigosEnComun=2 (diagrama de secuencia).
+ * Endpoints de usuarios. CU-13: GET /usuarios?amigosEnComun=2; CU-7: GET /usuarios/buscar;
+ * CU-2: POST /usuarios/login; CU-1: POST /usuarios.
  *
- * Como la demo no tiene sesion/login, el "usuario actual" se toma del parametro
- * usuarioId (por defecto 1 = 'martin', el usuario de referencia sembrado).
+ * El "usuario actual" lo aporta el login (CU-2): el front guarda el id del usuario logueado
+ * y lo manda como usuarioId. Si no viene, se cae al usuario de referencia de la demo (martin).
  */
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    /** Usuario de referencia por defecto para la demo (martin, sembrado con id=1). */
+    /** Usuario de referencia por defecto cuando no llega usuarioId (martin, sembrado con id=1). */
     private static final Long DEMO_USUARIO_ID = 1L;
 
     private final UsuarioService usuarioService;
@@ -38,29 +40,49 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
+    /** CU-13 (secuencia: listarUsuarios): usuarios con +N amigos en comun ("personas que quizas conozcas"). */
     @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> buscarUsuarios(
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios(
             @RequestParam(name = "amigosEnComun", defaultValue = "2") int amigosEnComun,
-            @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "usuarioId", required = false) Long usuarioId) {
 
-        Long refId = (usuarioId != null) ? usuarioId : DEMO_USUARIO_ID;
-        Usuario referencia = usuarioService.obtenerPorId(refId);
-        if (referencia == null) {
-            throw new UsuarioNotFoundException("Usuario de referencia no encontrado");
-        }
+        Usuario referencia = resolverReferencia(usuarioId);
 
-        // Searchbar: si viene texto, busca usuarios por nombre/apellido (lista vacia => 200 []).
-        if (q != null && !q.isBlank()) {
-            return ResponseEntity.ok(usuarioService.buscarPorTexto(referencia, q.trim()));
-        }
-
-        // CU-13: sin texto, sugiere usuarios con +N amigos en comun (vacio => 404).
         List<UsuarioDTO> usuarios = usuarioService.listarConAmigosEnComun(referencia, amigosEnComun);
         if (usuarios.isEmpty()) {
             throw new UsuarioNotFoundException("No se encontraron usuarios");
         }
         return ResponseEntity.ok(usuarios);
+    }
+
+    /**
+     * CU-7: busca usuarios por nombre o apellido. La searchbar (un solo campo) manda el mismo
+     * texto en ambos params. Lista vacia => 200 [].
+     */
+    @GetMapping("/buscar")
+    public ResponseEntity<List<UsuarioDTO>> buscarUsuarios(
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombre,
+            @RequestParam(name = "apellido", required = false, defaultValue = "") String apellido,
+            @RequestParam(name = "usuarioId", required = false) Long usuarioId) {
+
+        Usuario referencia = resolverReferencia(usuarioId);
+        return ResponseEntity.ok(usuarioService.buscarPorTexto(referencia, nombre.trim(), apellido.trim()));
+    }
+
+    /** CU-2: inicia sesion. 200 + usuario si las credenciales son validas; 401/400 en error. */
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioDTO> login(@Valid @RequestBody LoginDTO datos) {
+        Usuario usuario = usuarioService.iniciarSesion(datos.getEmail(), datos.getContrasena());
+        return ResponseEntity.ok(UsuarioDTO.fromEntity(usuario));
+    }
+
+    private Usuario resolverReferencia(Long usuarioId) {
+        Long refId = (usuarioId != null) ? usuarioId : DEMO_USUARIO_ID;
+        Usuario referencia = usuarioService.obtenerPorId(refId);
+        if (referencia == null) {
+            throw new UsuarioNotFoundException("Usuario de referencia no encontrado");
+        }
+        return referencia;
     }
 
     /**

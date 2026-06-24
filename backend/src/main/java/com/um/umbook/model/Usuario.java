@@ -35,6 +35,9 @@ public class Usuario {
 
     private boolean activo = true;
 
+    /** Intentos fallidos consecutivos de inicio de sesion (CU-2): al superar el umbral se bloquea. */
+    private int intentosFallidos = 0;
+
     /** Dias de anticipacion con que se notifican los cumpleaños (config del diagrama). */
     private int diasCumpleanosConfig = 7;
 
@@ -113,6 +116,14 @@ public class Usuario {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public int getIntentosFallidos() {
+        return intentosFallidos;
+    }
+
+    public void setIntentosFallidos(int intentosFallidos) {
+        this.intentosFallidos = intentosFallidos;
     }
 
     public int getDiasCumpleanosConfig() {

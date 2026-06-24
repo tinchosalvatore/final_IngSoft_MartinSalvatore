@@ -1,6 +1,8 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.UsuarioDTO;
+import com.um.umbook.exception.CredencialesInvalidasException;
+import com.um.umbook.exception.CuentaBloqueadaException;
 import com.um.umbook.exception.UsuarioNotFoundException;
 import com.um.umbook.exception.UsuarioYaExisteException;
 import com.um.umbook.model.Usuario;
@@ -83,6 +85,42 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    /** Intentos fallidos consecutivos antes de bloquear la cuenta (CU-2, alt "multiples intentos"). */
+    private static final int MAX_INTENTOS_FALLIDOS = 3;
+
+    /**
+     * CU-2: inicia sesion validando email + contrasena (BCrypt). Devuelve el usuario si las
+     * credenciales son correctas. Si la cuenta esta bloqueada (activo=false) lanza
+     * {@link CuentaBloqueadaException} (400). Si las credenciales son invalidas, suma un intento
+     * fallido y, al alcanzar {@link #MAX_INTENTOS_FALLIDOS}, bloquea la cuenta (activo=false) y
+     * lanza {@link CuentaBloqueadaException}; en caso contrario lanza
+     * {@link CredencialesInvalidasException} (401). Un inicio exitoso resetea el contador.
+     */
+    public Usuario iniciarSesion(String email, String contrasena) {
+        Usuario usuario = usuarioRepository.findByEmail(email);
+        if (usuario == null) {
+            throw new CredencialesInvalidasException("Usuario inexistente o contrasena incorrecta");
+        }
+        if (!usuario.isActivo()) {
+            throw new CuentaBloqueadaException("La cuenta esta bloqueada por multiples intentos fallidos");
+        }
+        if (!passwordEncoder.matches(contrasena, usuario.getContrasena())) {
+            usuario.setIntentosFallidos(usuario.getIntentosFallidos() + 1);
+            if (usuario.getIntentosFallidos() >= MAX_INTENTOS_FALLIDOS) {
+                usuario.setActivo(false);
+                usuarioRepository.save(usuario);
+                throw new CuentaBloqueadaException("La cuenta quedo bloqueada por multiples intentos fallidos");
+            }
+            usuarioRepository.save(usuario);
+            throw new CredencialesInvalidasException("Usuario inexistente o contrasena incorrecta");
+        }
+        if (usuario.getIntentosFallidos() != 0) {
+            usuario.setIntentosFallidos(0);
+            usuarioRepository.save(usuario);
+        }
+        return usuario;
+    }
+
     /** Cantidad de sugerencias que devuelve cada recarga (de a dos). */
     private static final int EXTRAS_POR_RECARGA = 2;
 
@@ -149,13 +187,13 @@ public class UsuarioService {
     }
 
     /**
-     * Busqueda de la searchbar: usuarios cuyo nombre o apellido contiene {@code texto},
-     * excluyendo al propio usuario de referencia. Cada resultado incluye cuantos amigos en
-     * comun tiene con la referencia (para mostrarlo en la tarjeta, igual que la sugerencia).
+     * CU-7: busqueda por nombre o apellido (delega 1:1 en {@link #buscarUsuarios(String, String)}),
+     * excluyendo al propio usuario de referencia. Cada resultado incluye cuantos amigos en comun
+     * tiene con la referencia (campo extra de la tarjeta, ver docs/EXTRAS.md).
      */
-    public List<UsuarioDTO> buscarPorTexto(Usuario referencia, String texto) {
+    public List<UsuarioDTO> buscarPorTexto(Usuario referencia, String nombre, String apellido) {
         List<UsuarioDTO> resultado = new ArrayList<>();
-        for (Usuario candidato : buscarUsuarios(texto, texto)) {
+        for (Usuario candidato : buscarUsuarios(nombre, apellido)) {
             if (candidato.getId().equals(referencia.getId())) {
                 continue; // no me muestro a mi mismo
             }

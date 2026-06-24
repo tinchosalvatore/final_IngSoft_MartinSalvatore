@@ -14,7 +14,7 @@ la fuente 1:1; esto es lo que se permitió por encima.
 | `UsuarioService.agregarSugerenciaExtra(...)` + `POST /usuarios/sugerencia-extra` | `service/UsuarioService.java`, `controller/UsuarioController.java` | Botón "recargar sugerencias" del buscador (CU-13): crea un lote de usuarios demo con +2 amigos en común. No está en el diagrama. |
 | `UsuarioService.marcarCumpleanosHoy(...)` + `PUT /usuarios/{id}/cumpleanos` | idem | Permite elegir el cumpleañero antes de correr el batch (demo CU-15). |
 | `UsuarioService.cumpleanosDeHoy(...)` + `GET /usuarios/cumpleanos` | idem | Alimenta la tarjeta de "Cumpleaños" del home. |
-| `UsuarioService.buscarPorTexto(...)` + param `q` en `GET /usuarios` | idem | Searchbar por nombre/apellido. El diagrama tiene `buscarUsuarios(nombre, apellido)` en el service, pero el endpoint con `q` es agregado. |
+| `UsuarioService.buscarPorTexto(...)` (campo `amigosEnComun` en el resultado de CU-7) | `service/UsuarioService.java` | CU-7 ya es 1:1: endpoint `GET /usuarios/buscar?nombre=&apellido=` + `buscarUsuarios(nombre, apellido)`. El `amigosEnComun` que devuelve la tarjeta es extra sobre el `List<Usuario>` del diagrama (ver `docs/diseño/diag_sec/MODIFICACIONES.md`). |
 | `UsuarioService.obtenerPorId(...)` | `service/UsuarioService.java` | Helper para resolver el "usuario actual" de la demo (no hay login). |
 | `AmistadService.sonAmigos(...)` | `service/AmistadService.java` | Helper de conveniencia, no está en el diagrama. |
 | `SolicitudAmistadService.obtenerPendientes(...)` + `GET /solicitudes/pendientes` + `SolicitudAmistadRepository.findByDestinatarioAndEstado(...)` | `service/`, `controller/`, `repository/` | Subflujo "click en la notificación" de CU-14 (aparece en los diag. de secuencia, no en el de clases). |
@@ -36,7 +36,13 @@ la fuente 1:1; esto es lo que se permitió por encima.
 ## Frontend
 
 Todo el frontend es "extra" respecto al diagrama de clases (que modela el backend). Los componentes
-Angular (`buscador`, `solicitudes`, `chat`, `home`, `toast`, `registro`, `perfil`) mapean a las
-clases de borde de los **diagramas de colaboración** (`UISearchbar`, `UISolicitudes`, `UIChat`,
+Angular (`inicio`, `buscador`, `solicitudes`, `chat`, `home`, `toast`, `registro`, `perfil`) mapean
+a las clases de borde de los **diagramas de colaboración** (`UISearchbar`, `UISolicitudes`, `UIChat`,
 `UIhome`, etc.), no al diagrama de clases. El campo `tokenEmail` agregado a `SolicitudAmistad`
 (modelo TS) espeja el DTO para poder aceptar/rechazar por token.
+
+CU-2 trae infraestructura de sesión del lado del front (no modelada en el diagrama de clases, que
+es del backend): `SesionService` (guarda el usuario logueado en `localStorage` y expone su id) y
+`sesionGuard` (redirige a `/login` si no hay sesión). El backend agrega el contador
+`Usuario.intentosFallidos` para el bloqueo de cuenta del CU-2 (ver
+`docs/diseño/diag_sec/MODIFICACIONES.md`).

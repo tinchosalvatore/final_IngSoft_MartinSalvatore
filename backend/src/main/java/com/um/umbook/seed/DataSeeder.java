@@ -22,6 +22,9 @@ import java.time.LocalDate;
  *   Eva    -- Ana, Beto, Carla   => 3 amigos en comun con Martin  (aparece en CU-13)
  *   Fede   -- Ana                => 1 amigo en comun con Martin   (NO aparece en CU-13)
  *   Gabi   -- (sin amigos)       => 0                              (NO aparece)
+ *   Tincho -- Ana, Beto, Carla   => 3 amigos en comun con Martin  (aparece en CU-13).
+ *            Logueado como Tincho: ve a Martin/Diego/Eva como sugerencias y, como Ana (su
+ *            amiga) cumple hoy, recibe la notificacion de cumpleaños (CU-15).
  *
  * Cumpleaños: Ana cumple hoy (para disparar CU-15 sin scripts).
  */
@@ -57,6 +60,7 @@ public class DataSeeder implements CommandLineRunner {
         Usuario eva = crear("Eva", "Mura", "eva@um.edu.ar", "eva", LocalDate.of(2002, 4, 18));
         Usuario fede = crear("Fede", "Sosa", "fede@um.edu.ar", "fede", LocalDate.of(2000, 9, 9));
         Usuario gabi = crear("Gabi", "Vega", "gabi@um.edu.ar", "gabi", LocalDate.of(1997, 12, 1));
+        Usuario tincho = crear("Tincho", "Vargas", "tincho11@um.edu.ar", "tincho11", LocalDate.of(2001, 6, 7));
 
         // Amistades de Martin
         amistad(martin, ana);
@@ -76,6 +80,12 @@ public class DataSeeder implements CommandLineRunner {
         amistad(fede, ana);
 
         // Gabi: sin amistades
+
+        // Tincho (tincho11): amigo de Ana, Beto, Carla => 3 en comun con Martin (aparece en CU-13).
+        // Ana cumple hoy => logueado como tincho11 recibe la notificacion de cumpleaños (CU-15).
+        amistad(tincho, ana);
+        amistad(tincho, beto);
+        amistad(tincho, carla);
 
         log.info("Seed completo: {} usuarios, {} amistades. Usuario de referencia demo = 'martin' (id={}).",
                 usuarioRepository.count(), amistadRepository.count(), martin.getId());

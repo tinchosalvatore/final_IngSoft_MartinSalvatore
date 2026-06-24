@@ -3,8 +3,8 @@
   <p class="sub">Inicia sesion en tu cuenta</p>
 
   <form #f="ngForm" (ngSubmit)="iniciarSesion()" class="form">
-    <label>Email
-      <input name="email" type="email" [(ngModel)]="email" required />
+    <label>Email o usuario
+      <input name="email" type="text" [(ngModel)]="email" required />
     </label>
 
     <label>Contrasena

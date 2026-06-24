@@ -97,6 +97,17 @@ public class UsuarioService {
      * {@link CredencialesInvalidasException} (401). Un inicio exitoso resetea el contador.
      */
     public Usuario iniciarSesion(String email, String contrasena) {
+        // El parametro mantiene el nombre 'email' (1:1 con el diagrama). Por UX el campo acepta
+        // tambien el nombre de usuario: si no es un email registrado, se resuelve a su email y
+        // el lookup de autenticacion sigue siendo findByEmail (1:1 con la secuencia CU-2).
+        // Desviacion documentada en docs/diseño/diag_sec/MODIFICACIONES.md.
+        if (usuarioRepository.findByEmail(email) == null) {
+            Usuario porNombreUsuario = usuarioRepository.findByNombreUsuario(email);
+            if (porNombreUsuario != null) {
+                email = porNombreUsuario.getEmail();
+            }
+        }
+
         Usuario usuario = usuarioRepository.findByEmail(email);
         if (usuario == null) {
             throw new CredencialesInvalidasException("Usuario inexistente o contrasena incorrecta");

@@ -4,11 +4,16 @@ Implementación del examen final de Ingeniería de Software (Proceso Unificado d
 UM-Book es un "facebook" de la Universidad de Mendoza. La implementación es 1:1 con el diseño
 documentado (diagrama de clases y de secuencia) y cubre los casos de uso:
 
+- **CU-1 Registrarse** (alta de usuario, fullstack).
+- **CU-2 Iniciar Sesión** (login por email o usuario, con bloqueo de cuenta tras 3 intentos fallidos).
+- **CU-6 Enviar Solicitud de Amistad** (con guardas: ya son amigos / solicitud ya pendiente).
+- **CU-7 Buscar Usuarios** (búsqueda por nombre/apellido).
 - **CU-13 Listar Usuarios con +2 Amigos en Común** (buscador, fullstack).
 - **CU-14 Notificar Solicitud de Amistad** (toast en vivo, sin refrescar).
 - **CU-15 Notificar Cumpleaños** (toast en vivo, sin refrescar).
+- **CU-18 Gestionar Solicitudes** (listar pendientes, aceptar → notifica al remitente, rechazar → elimina).
 
-Más: Home (solo UI), alta simple de usuario, y 2 scripts Java que disparan las notificaciones
+Más: Home (solo UI), chat (solo UI), y 2 scripts Java que disparan las notificaciones
 desde el back para verlas llegar en vivo a la UI.
 
 ---

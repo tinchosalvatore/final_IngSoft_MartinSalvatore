@@ -35,6 +35,11 @@ y se mapeó al **componente Angular real** con nombre semántico:
   exitoso lo resetea. Una cuenta con `activo=false` no puede iniciar sesión (400).
 - Códigos: credenciales inválidas → **401** (`CredencialesInvalidasException`); cuenta
   bloqueada → **400** (`CuentaBloqueadaException`).
+- **Login por email o nombre de usuario (UX):** el campo del login acepta email **o** nombre de
+  usuario. La firma se mantiene 1:1 (`iniciarSesion(email, contrasena)`) y el lookup de
+  autenticación sigue siendo `findByEmail` (= secuencia CU-2): si lo ingresado no es un email
+  registrado, se resuelve a su email vía `findByNombreUsuario` **antes** de autenticar. Es una
+  desviación "retorcida" (la secuencia solo modela `findByEmail`).
 - **Usuario actual:** el diseño asume que el usuario actual proviene del login (CU-2). Se quitó
   el `DEMO_USUARIO_ID = 1` hardcodeado del front; ahora el id sale de la sesión
   (`SesionService`) y se propaga como `usuarioId` al resto (SSE, CU-7, CU-13, CU-18). Si no hay

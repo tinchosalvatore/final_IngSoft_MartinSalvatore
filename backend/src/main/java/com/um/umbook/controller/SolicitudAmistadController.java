@@ -64,9 +64,8 @@ public class SolicitudAmistadController {
     }
 
     @GetMapping("/pendientes")
-    public ResponseEntity<List<SolicitudAmistadDTO>> obtenerSolicitudes(
-            @RequestParam(name = "usuarioId", required = false) Long usuarioId) {
-        Usuario usuario = usuarioService.obtenerPorId(usuarioId != null ? usuarioId : DEMO_USUARIO_ID);
+    public ResponseEntity<List<SolicitudAmistadDTO>> obtenerSolicitudes() {
+        Usuario usuario = usuarioService.obtenerPorId(DEMO_USUARIO_ID);
         if (usuario == null) {
             throw new UsuarioNotFoundException("Usuario no encontrado");
         }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -37,14 +36,13 @@ public class NotificacionController {
 
     /** Canal SSE: el frontend abre un EventSource aca y recibe los toasts en vivo. */
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@RequestParam(name = "usuarioId", required = false) Long usuarioId) {
-        return notificacionService.suscribir(usuarioId != null ? usuarioId : DEMO_USUARIO_ID);
+    public SseEmitter stream() {
+        return notificacionService.suscribir(DEMO_USUARIO_ID);
     }
 
     @GetMapping("/no-leidas")
-    public ResponseEntity<List<NotificacionDTO>> noLeidas(
-            @RequestParam(name = "usuarioId", required = false) Long usuarioId) {
-        Usuario usuario = usuarioService.obtenerPorId(usuarioId != null ? usuarioId : DEMO_USUARIO_ID);
+    public ResponseEntity<List<NotificacionDTO>> noLeidas() {
+        Usuario usuario = usuarioService.obtenerPorId(DEMO_USUARIO_ID);
         if (usuario == null) {
             throw new UsuarioNotFoundException("Usuario no encontrado");
         }

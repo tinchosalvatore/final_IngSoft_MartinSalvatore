@@ -1,10 +1,7 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.UsuarioDTO;
-import com.um.umbook.exception.CredencialesInvalidasException;
-import com.um.umbook.exception.CuentaBloqueadaException;
 import com.um.umbook.exception.UsuarioNotFoundException;
-import com.um.umbook.exception.UsuarioYaExisteException;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,69 +66,6 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Registra un usuario nuevo. Verifica que email y nombre de usuario sean unicos
-     * y guarda la contrasena hasheada con BCrypt.
-     */
-    public Usuario registrar(Usuario usuario) {
-        if (usuarioRepository.findByEmail(usuario.getEmail()) != null) {
-            throw new UsuarioYaExisteException("Ya existe un usuario con ese email");
-        }
-        if (usuarioRepository.findByNombreUsuario(usuario.getNombreUsuario()) != null) {
-            throw new UsuarioYaExisteException("Ya existe un usuario con ese nombre de usuario");
-        }
-        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
-        usuario.setActivo(true);
-        return usuarioRepository.save(usuario);
-    }
-
-    /** Intentos fallidos consecutivos antes de bloquear la cuenta (CU-2, alt "multiples intentos"). */
-    private static final int MAX_INTENTOS_FALLIDOS = 3;
-
-    /**
-     * CU-2: inicia sesion validando email + contrasena (BCrypt). Devuelve el usuario si las
-     * credenciales son correctas. Si la cuenta esta bloqueada (activo=false) lanza
-     * {@link CuentaBloqueadaException} (400). Si las credenciales son invalidas, suma un intento
-     * fallido y, al alcanzar {@link #MAX_INTENTOS_FALLIDOS}, bloquea la cuenta (activo=false) y
-     * lanza {@link CuentaBloqueadaException}; en caso contrario lanza
-     * {@link CredencialesInvalidasException} (401). Un inicio exitoso resetea el contador.
-     */
-    public Usuario iniciarSesion(String email, String contrasena) {
-        // El parametro mantiene el nombre 'email' (1:1 con el diagrama). Por UX el campo acepta
-        // tambien el nombre de usuario: si no es un email registrado, se resuelve a su email y
-        // el lookup de autenticacion sigue siendo findByEmail (1:1 con la secuencia CU-2).
-        // Desviacion documentada en docs/diseño/diag_sec/MODIFICACIONES.md.
-        if (usuarioRepository.findByEmail(email) == null) {
-            Usuario porNombreUsuario = usuarioRepository.findByNombreUsuario(email);
-            if (porNombreUsuario != null) {
-                email = porNombreUsuario.getEmail();
-            }
-        }
-
-        Usuario usuario = usuarioRepository.findByEmail(email);
-        if (usuario == null) {
-            throw new CredencialesInvalidasException("Usuario inexistente o contrasena incorrecta");
-        }
-        if (!usuario.isActivo()) {
-            throw new CuentaBloqueadaException("La cuenta esta bloqueada por multiples intentos fallidos");
-        }
-        if (!passwordEncoder.matches(contrasena, usuario.getContrasena())) {
-            usuario.setIntentosFallidos(usuario.getIntentosFallidos() + 1);
-            if (usuario.getIntentosFallidos() >= MAX_INTENTOS_FALLIDOS) {
-                usuario.setActivo(false);
-                usuarioRepository.save(usuario);
-                throw new CuentaBloqueadaException("La cuenta quedo bloqueada por multiples intentos fallidos");
-            }
-            usuarioRepository.save(usuario);
-            throw new CredencialesInvalidasException("Usuario inexistente o contrasena incorrecta");
-        }
-        if (usuario.getIntentosFallidos() != 0) {
-            usuario.setIntentosFallidos(0);
-            usuarioRepository.save(usuario);
-        }
-        return usuario;
-    }
-
     /** Cantidad de sugerencias que devuelve cada recarga (de a dos). */
     private static final int EXTRAS_POR_RECARGA = 2;
 
@@ -192,26 +126,9 @@ public class UsuarioService {
         return resultado;
     }
 
-    /** Busqueda por texto (nombre o apellido) usada por la searchbar. */
+    /** CU-7: busqueda por nombre o apellido (1:1 con el diagrama). */
     public List<Usuario> buscarUsuarios(String nombre, String apellido) {
         return usuarioRepository.findByNombreContainingOrApellidoContaining(nombre, apellido);
-    }
-
-    /**
-     * CU-7: busqueda por nombre o apellido (delega 1:1 en {@link #buscarUsuarios(String, String)}),
-     * excluyendo al propio usuario de referencia. Cada resultado incluye cuantos amigos en comun
-     * tiene con la referencia (campo extra de la tarjeta, ver docs/EXTRAS.md).
-     */
-    public List<UsuarioDTO> buscarPorTexto(Usuario referencia, String nombre, String apellido) {
-        List<UsuarioDTO> resultado = new ArrayList<>();
-        for (Usuario candidato : buscarUsuarios(nombre, apellido)) {
-            if (candidato.getId().equals(referencia.getId())) {
-                continue; // no me muestro a mi mismo
-            }
-            int comunes = amistadService.obtenerAmigosEnComun(referencia, candidato).size();
-            resultado.add(UsuarioDTO.fromEntity(candidato, comunes));
-        }
-        return resultado;
     }
 
     /**
@@ -220,14 +137,18 @@ public class UsuarioService {
      * El filtrado pesado (≥2 + exclusiones) lo hace el repositorio
      * ({@link UsuarioRepository#findUsuariosConAmigosEnComun}, 1:1 con el diagrama); aca solo se
      * arma el DTO con el conteo de comunes y, si {@code minAmigos>2}, se aplica el umbral extra.
+     * Si no hay usuarios, lanza {@link UsuarioNotFoundException} (alt "Lista vacia" de la secuencia).
      */
-    public List<UsuarioDTO> listarConAmigosEnComun(Usuario referencia, int minAmigos) {
+    public List<UsuarioDTO> listarUsuarios(Usuario referencia, int minAmigos) {
         List<UsuarioDTO> resultado = new ArrayList<>();
         for (Usuario candidato : usuarioRepository.findUsuariosConAmigosEnComun(referencia)) {
             int comunes = amistadService.obtenerAmigosEnComun(referencia, candidato).size();
             if (comunes >= minAmigos) {
                 resultado.add(UsuarioDTO.fromEntity(candidato, comunes));
             }
+        }
+        if (resultado.isEmpty()) {
+            throw new UsuarioNotFoundException("No se encontraron usuarios");
         }
         return resultado;
     }

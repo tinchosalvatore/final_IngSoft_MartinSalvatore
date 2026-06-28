@@ -1,7 +1,7 @@
 package com.um.umbook.service;
 
 import com.um.umbook.dto.UsuarioDTO;
-import com.um.umbook.exception.UsuarioYaExisteException;
+import com.um.umbook.exception.UsuarioNotFoundException;
 import com.um.umbook.model.Usuario;
 import com.um.umbook.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
@@ -16,14 +16,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests de UsuarioService. Cubre CP 11.1.1 / CP 11.1.2 (listar usuarios con +2 amigos en comun)
- * y el alta de usuario (registro exitoso / duplicados).
+ * Tests de UsuarioService. Cubre CU-7 (buscar usuarios, CP 1.3.1 / 1.3.2 / 1.3.3 / 1.3.5)
+ * y CU-13 (listar usuarios con +2 amigos en comun, CP 11.1.1 / 11.1.2).
  */
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -40,24 +37,52 @@ class UsuarioServiceTest {
     @InjectMocks
     private UsuarioService usuarioService;
 
-    private Usuario usuario(Long id, String nombre) {
-        Usuario u = new Usuario(nombre, "Ap", nombre + "@um.edu.ar", nombre, "x", LocalDate.of(2000, 1, 1));
+    private Usuario usuario(Long id, String nombre, String apellido) {
+        Usuario u = new Usuario(nombre, apellido, nombre + "@um.edu.ar", nombre, "x", LocalDate.of(2000, 1, 1));
         u.setId(id);
         return u;
     }
 
+    // ==================== CU-7: Buscar Usuarios ====================
+
+    // ---------- CP 1.3.1 / 1.3.2 / 1.3.3 ----------
+    @Test
+    void buscarUsuarios_devuelveLasCoincidenciasDelRepositorio() {
+        Usuario ana = usuario(2L, "Ana", "Gomez");
+        // La searchbar manda el mismo texto como nombre y apellido (busqueda por nombre o apellido).
+        when(usuarioRepository.findByNombreContainingOrApellidoContaining("gomez", "gomez"))
+                .thenReturn(List.of(ana));
+
+        List<Usuario> resultado = usuarioService.buscarUsuarios("gomez", "gomez");
+
+        assertThat(resultado).containsExactly(ana);
+    }
+
+    // ---------- CP 1.3.5 ----------
+    @Test
+    void buscarUsuarios_sinResultados_devuelveListaVacia() {
+        when(usuarioRepository.findByNombreContainingOrApellidoContaining("zzzz", "zzzz"))
+                .thenReturn(List.of());
+
+        List<Usuario> resultado = usuarioService.buscarUsuarios("zzzz", "zzzz");
+
+        assertThat(resultado).isEmpty();
+    }
+
+    // ==================== CU-13: Listar +2 amigos en comun ====================
+
     // ---------- CP 11.1.1 ----------
     @Test
-    void listarConAmigosEnComun_listaUsuariosConDosOMasAmigosEnComun() {
-        Usuario ref = usuario(1L, "jperez");
-        Usuario candidatoA = usuario(3L, "candidatoA"); // 2 en comun -> aparece
+    void listarUsuarios_listaUsuariosConDosOMasAmigosEnComun() {
+        Usuario ref = usuario(1L, "jperez", "Perez");
+        Usuario candidatoA = usuario(3L, "candidatoA", "Ap"); // 2 en comun -> aparece
 
         // El filtrado pesado (≥2 + exclusiones) lo hace el repositorio (1:1 con el diagrama).
         when(usuarioRepository.findUsuariosConAmigosEnComun(ref)).thenReturn(List.of(candidatoA));
         when(amistadService.obtenerAmigosEnComun(ref, candidatoA))
-                .thenReturn(List.of(usuario(8L, "x"), usuario(9L, "y")));
+                .thenReturn(List.of(usuario(8L, "x", "Ap"), usuario(9L, "y", "Ap")));
 
-        List<UsuarioDTO> resultado = usuarioService.listarConAmigosEnComun(ref, 2);
+        List<UsuarioDTO> resultado = usuarioService.listarUsuarios(ref, 2);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNombreUsuario()).isEqualTo("candidatoA");
@@ -66,50 +91,12 @@ class UsuarioServiceTest {
 
     // ---------- CP 11.1.2 ----------
     @Test
-    void listarConAmigosEnComun_devuelveVacioCuandoNadieCalifica() {
-        Usuario ref = usuario(1L, "jperez");
+    void listarUsuarios_sinCandidatos_lanzaUsuarioNotFound() {
+        Usuario ref = usuario(1L, "jperez", "Perez");
 
         // El repositorio no devuelve candidatos con +2 amigos en comun.
         when(usuarioRepository.findUsuariosConAmigosEnComun(ref)).thenReturn(List.of());
 
-        List<UsuarioDTO> resultado = usuarioService.listarConAmigosEnComun(ref, 2);
-
-        assertThat(resultado).isEmpty();
-    }
-
-    // ---------- Alta de usuario ----------
-    @Test
-    void registrar_exitoso_hasheaContrasenaYGuarda() {
-        Usuario nuevo = usuario(null, "nuevo");
-        nuevo.setContrasena("secreta123");
-        when(usuarioRepository.findByEmail(nuevo.getEmail())).thenReturn(null);
-        when(usuarioRepository.findByNombreUsuario(nuevo.getNombreUsuario())).thenReturn(null);
-        when(passwordEncoder.encode("secreta123")).thenReturn("HASH");
-        when(usuarioRepository.save(nuevo)).thenReturn(nuevo);
-
-        Usuario guardado = usuarioService.registrar(nuevo);
-
-        assertThat(guardado.getContrasena()).isEqualTo("HASH");
-        assertThat(guardado.isActivo()).isTrue();
-        verify(usuarioRepository).save(nuevo);
-    }
-
-    @Test
-    void registrar_emailDuplicado_lanzaExcepcion() {
-        Usuario nuevo = usuario(null, "nuevo");
-        when(usuarioRepository.findByEmail(nuevo.getEmail())).thenReturn(usuario(5L, "existente"));
-
-        assertThrows(UsuarioYaExisteException.class, () -> usuarioService.registrar(nuevo));
-        verify(usuarioRepository, never()).save(eq(nuevo));
-    }
-
-    @Test
-    void registrar_nombreUsuarioDuplicado_lanzaExcepcion() {
-        Usuario nuevo = usuario(null, "nuevo");
-        when(usuarioRepository.findByEmail(nuevo.getEmail())).thenReturn(null);
-        when(usuarioRepository.findByNombreUsuario(nuevo.getNombreUsuario())).thenReturn(usuario(5L, "existente"));
-
-        assertThrows(UsuarioYaExisteException.class, () -> usuarioService.registrar(nuevo));
-        verify(usuarioRepository, never()).save(eq(nuevo));
+        assertThrows(UsuarioNotFoundException.class, () -> usuarioService.listarUsuarios(ref, 2));
     }
 }

@@ -1,20 +1,32 @@
 # UM-Book — Implementación
 
-Implementación del examen final de Ingeniería de Software (Proceso Unificado de Desarrollo).
-UM-Book es un "facebook" de la Universidad de Mendoza. La implementación es 1:1 con el diseño
-documentado (diagrama de clases y de secuencia) y cubre los casos de uso:
+Examen final de Ingeniería de Software (Proceso Unificado de Desarrollo). UM-Book es un
+"facebook" de la Universidad de Mendoza, **fullstack** (Spring Boot + Angular).
 
-- **CU-1 Registrarse** (alta de usuario, fullstack).
-- **CU-2 Iniciar Sesión** (login por email o usuario, con bloqueo de cuenta tras 3 intentos fallidos).
-- **CU-6 Enviar Solicitud de Amistad** (con guardas: ya son amigos / solicitud ya pendiente).
-- **CU-7 Buscar Usuarios** (búsqueda por nombre/apellido).
-- **CU-13 Listar Usuarios con +2 Amigos en Común** (buscador, fullstack).
-- **CU-14 Notificar Solicitud de Amistad** (toast en vivo, sin refrescar).
-- **CU-15 Notificar Cumpleaños** (toast en vivo, sin refrescar).
-- **CU-18 Gestionar Solicitudes** (listar pendientes, aceptar → notifica al remitente, rechazar → elimina).
+> **Importante para la corrección:** solo **4 casos de uso** están implementados **1:1 estricto**
+> con el diseño (clases, métodos, parámetros y retornos — front y back). El resto del sistema es
+> **andamiaje de demo** para que la app no se sienta vacía y **no debe evaluarse como 1:1**. El
+> detalle está en la sección [Alcance](#alcance--qué-es-11-y-qué-no) de acá abajo.
 
-Más: Home (solo UI), chat (solo UI), y 2 scripts Java que disparan las notificaciones
-desde el back para verlas llegar en vivo a la UI.
+---
+
+## Alcance — qué es 1:1 y qué no
+
+| Categoría | Qué incluye | Cómo evaluarlo |
+|---|---|---|
+| ✅ **1:1 estricto** | **CU-7** Buscar Usuarios · **CU-13** Listar Usuarios con +2 Amigos en Común · **CU-14** Notificar Solicitud de Amistad · **CU-15** Notificar Cumpleaños | Implementados **fullstack 1:1** (front + back). Es lo que hay que corregir contra los diagramas. |
+| 🔧 **Soporte funcional** | **CU-6** Enviar Solicitud · **CU-18** Gestionar Solicitudes (aceptar/rechazar) | Funcionan y son coherentes con el diseño, pero **no son objetivo de 1:1**. CU-14 los necesita: enviar dispara la notificación y el click del toast aterriza en la lista de pendientes. |
+| 🎨 **Decoración (NO 1:1)** | **Home** (feed y contactos mockeados) · **Perfil** (placeholder) · **Chat** (demo solo-front, respuesta precargada) | UI sin lógica de negocio real, solo para dar vida a la demo. **No evaluar como 1:1.** |
+| ❌ **Eliminado** | **CU-1** Registrarse · **CU-2** Iniciar Sesión | Quitados por completo (front y back): **no hay login ni sesión**. |
+
+**Decisiones clave**
+
+- **Sin autenticación.** No hay login, registro ni sesión. El "usuario actual" es **fijo: `martin`
+  (id=1)**, sembrado por `DataSeeder` y resuelto internamente en el backend. Se eliminó el
+  parámetro `usuarioId` de todos los endpoints (no estaba en el diseño).
+- **Dónde el código se aparta de los diagramas originales** (y por qué) está documentado en
+  **[`docs/diseño/CAMBIOS.md`](docs/diseño/CAMBIOS.md)**. Conviene leerlo junto con los diagramas
+  nuevos (ver [Documentación de diseño](#documentación-de-diseño)).
 
 ---
 
@@ -26,7 +38,7 @@ desde el back para verlas llegar en vivo a la UI.
 | Frontend | Angular 18 (TypeScript) |
 | Base de datos | H2 en memoria (default) · MySQL 8.4 (perfil `mysql`) |
 | ORM | JPA / Hibernate |
-| Seguridad | Spring Security + BCrypt |
+| Seguridad | Spring Security **solo para CORS** (sin login). BCrypt se usa únicamente al sembrar datos |
 | Tiempo real | SSE (Server-Sent Events) |
 | Comunicación | REST API (JSON) |
 
@@ -38,28 +50,28 @@ desde el back para verlas llegar en vivo a la UI.
 final_IngSoft_MartinSalvatore/
 ├── backend/                  <- Spring Boot
 │   └── src/main/java/com/um/umbook/
-│       ├── config/           <- SecurityConfig (CORS + BCrypt)
-│       ├── controller/       <- Usuario, SolicitudAmistad, Notificacion, Dev
-│       ├── dto/              <- UsuarioDTO, RegistroDTO, NotificacionDTO, SolicitudAmistadDTO
-│       ├── exception/        <- Excepciones + GlobalExceptionHandler
+│       ├── config/           <- SecurityConfig (CORS + bean BCrypt; sin login)
+│       ├── controller/       <- Usuario, SolicitudAmistad, Notificacion, Cumpleanos
+│       ├── dto/              <- UsuarioDTO, NotificacionDTO, SolicitudAmistadDTO
+│       ├── exception/        <- Excepciones de dominio + GlobalExceptionHandler
 │       ├── model/            <- Usuario, Amistad, SolicitudAmistad, Notificacion (+ enums)
-│       ├── repository/       <- Repositorios JPA (+ JPQL amigos en común)
+│       ├── repository/       <- Repositorios JPA (+ JPQL de amigos en común)
 │       ├── service/          <- Usuario, Amistad, SolicitudAmistad, Notificacion, Cumpleanos, JavaMail
-│       └── seed/             <- DataSeeder (usuarios + amistades + cumpleaños)
+│       └── seed/             <- DataSeeder (9 usuarios + amistades; usuario demo = martin id=1)
 │
-├── frontend/                 <- Angular 18
+├── frontend/                 <- Angular 18 (entra directo como martin, sin login)
 │   └── src/app/
-│       ├── home/             <- Home (solo UI), link real al buscador
-│       ├── buscador/         <- CU-13: buscar usuarios con +2 amigos en común
-│       ├── registro/         <- Alta de usuario
-│       ├── solicitudes/      <- CU-14 (click): solicitudes pendientes + aceptar/rechazar
-│       ├── chat/             <- Chat (solo UI), destino del click de cumpleaños (CU-15)
-│       ├── toast/            <- ToastComponent global (SSE)
-│       ├── services/         <- UsuarioService, NotificacionService (EventSource)
-│       └── models/           <- Interfaces (Usuario, Notificacion, ...)
+│       ├── buscador/         <- CU-7 (buscar) + CU-13 (sugerencias +2 amigos)
+│       ├── solicitudes/      <- CU-14 (click): pendientes + aceptar/rechazar
+│       ├── toast/            <- ToastComponent global (SSE) — CU-14/15
+│       ├── home/             <- decoración (feed/contactos mock) + tarjeta de cumpleaños (CU-15)
+│       ├── perfil/           <- decoración (placeholder) + re-muestra sugerencias (CU-13)
+│       ├── chat/             <- decoración (chat demo solo-front) — destino del click de CU-15
+│       ├── services/         <- UsuarioService, NotificacionService (EventSource/SSE)
+│       └── models/           <- Interfaces (Usuario, Notificacion, SolicitudAmistad)
 │
 ├── scripts/                  <- TriggerSolicitud.java, TriggerCumple.java (disparan las notis)
-├── docs/                     <- IMPL_PLAN.md, diseño/, analisis/, tests/
+├── docs/                     <- diseño/ (diagramas + CAMBIOS), pruebas/, analisis/, requerimientos/
 └── boot.sh                   <- levanta backend + frontend de una sola vez
 ```
 
@@ -67,36 +79,28 @@ final_IngSoft_MartinSalvatore/
 
 ## Correr el proyecto
 
-Requisitos: Java 21 y Node 18+. No requiere Docker ni MySQL (la demo usa H2 en memoria).
+Requisitos: **Java 21** y **Node 18+**. No requiere Docker ni MySQL (la demo usa H2 en memoria).
 
 ### Inicio rápido (script)
 
-Para levantar **backend + frontend** de una sola vez:
-
 ```bash
-./boot.sh          # backend con H2 (la demo arranca sola)
+./boot.sh          # backend con H2 (la demo arranca sola) + frontend
 ./boot.sh mysql    # backend con perfil MySQL 8.4
 ```
 
-El script fuerza Java 21, instala las dependencias del frontend si faltan, y con un
-solo `Ctrl+C` frena ambos procesos. Si preferís arrancar cada parte a mano, seguí los
-pasos de abajo.
+El script fuerza Java 21, instala las dependencias del frontend si faltan, y con un solo
+`Ctrl+C` frena ambos procesos. Para arrancar a mano:
 
 ### 1. Backend (puerto 8080)
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+./mvnw spring-boot:run                                     # H2
+./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql    # MySQL 8.4
 ```
 
-Arranca con H2 en memoria y siembra usuarios + amistades automáticamente.
-El usuario observado en la demo es `martin` (id=1).
-
-Para usar MySQL 8.4 en lugar de H2 (requiere el server corriendo):
-
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
-```
+Arranca con H2 en memoria y siembra usuarios + amistades. El **usuario observado de la demo es
+`martin` (id=1)**; la UI entra directo como él (no hay login).
 
 ### 2. Frontend (puerto 4200)
 
@@ -106,18 +110,19 @@ npm install
 npx ng serve
 ```
 
-Abrir `http://localhost:4200`.
+Abrir `http://localhost:4200` (entra directo como `martin`).
 
 ### 3. Disparar las notificaciones en vivo
 
-Con backend + frontend corriendo y la UI abierta como `martin`:
+Con backend + frontend corriendo y la UI abierta (como `martin`):
 
 ```bash
-java scripts/TriggerSolicitud.java   # CU-14 -> toast de solicitud de amistad
-java scripts/TriggerCumple.java      # CU-15 -> toast de cumpleaños
+java scripts/TriggerSolicitud.java   # CU-14 — toast de solicitud (fede=7 -> martin=1)
+java scripts/TriggerCumple.java      # CU-15 — toast de cumpleaños (Ana cumple hoy -> notifica a martin)
 ```
 
-Ver `scripts/README.md` para opciones (ids de remitente/destinatario/cumpleañero).
+> Los scripts ya apuntan por defecto al usuario observado (**martin, id=1**). Aceptan ids
+> opcionales (ver `scripts/README.md`).
 
 ---
 
@@ -125,70 +130,78 @@ Ver `scripts/README.md` para opciones (ids de remitente/destinatario/cumpleañer
 
 | Método | Endpoint | Caso de uso | Descripción |
 |---|---|---|---|
-| `GET` | `/usuarios?amigosEnComun=2` | CU-13 | Usuarios con +2 amigos en común con el de referencia |
-| `POST` | `/usuarios` | Alta | Registra un usuario nuevo |
-| `GET` | `/notificaciones/stream` | CU-14/15 | Canal SSE de notificaciones en vivo |
+| `GET` | `/usuarios/buscar?nombre=&apellido=` | **CU-7** | Busca usuarios por nombre o apellido |
+| `GET` | `/usuarios?amigosEnComun=2` | **CU-13** | Usuarios con +N amigos en común (vacío → 404) |
+| `POST` | `/usuarios/sugerencia-extra` | CU-13 (demo) | Agrega un lote de sugerencias ("recargar") |
+| `GET` | `/usuarios/cumpleanos` | CU-15 (tarjeta) | Usuarios que cumplen años hoy |
+| `PUT` | `/usuarios/{id}/cumpleanos` | demo | Setea el cumpleaños de un usuario a hoy |
+| `POST` | `/solicitudes?remitenteId=&destinatarioId=` | **CU-6 / CU-14** | Envía la solicitud y notifica al destinatario |
+| `GET` | `/solicitudes/pendientes` | **CU-14** (click) / CU-18 | Solicitudes pendientes del usuario actual |
+| `POST` | `/solicitudes/aceptar?token=` | CU-18 | Acepta (crea la amistad, notifica al remitente) |
+| `POST` | `/solicitudes/rechazar?token=` | CU-18 | Rechaza (elimina la solicitud) |
+| `POST` | `/cumpleanos/ejecutar-batch` | **CU-15** | Corre el batch de cumpleaños del día |
+| `GET` | `/notificaciones/stream` | **CU-14/15** | Canal SSE de notificaciones en vivo |
 | `GET` | `/notificaciones/no-leidas` | CU-14/15 | Notificaciones no leídas |
-| `GET` | `/solicitudes/pendientes` | CU-14 (click) | Solicitudes de amistad pendientes |
-| `POST` | `/solicitudes/{id}/aceptar` | — | Acepta una solicitud (crea la amistad) |
-| `POST` | `/solicitudes/{id}/rechazar` | — | Rechaza una solicitud |
-| `POST` | `/dev/trigger-solicitud` | Demo CU-14 | Dispara una solicitud (usado por el script) |
-| `POST` | `/dev/trigger-cumple` | Demo CU-15 | Setea cumpleaños a hoy y corre el batch |
+| `PUT` | `/notificaciones/{id}/leida` | — | Marca una notificación como leída |
 
 ---
 
 ## Flujo de demo
 
 ```
-1. Ir a http://localhost:4200/        ->  Home (solo UI)
-2. Click en "Buscar usuarios"         ->  CU-13: lista usuarios con +2 amigos en común
-3. "Crear cuenta nueva"               ->  alta de usuario con cumpleaños
-4. java scripts/TriggerSolicitud.java ->  CU-14: aparece toast de solicitud en vivo
-5. Click en el toast / la campana     ->  pantalla de solicitudes pendientes (aceptar/rechazar)
-6. java scripts/TriggerCumple.java    ->  CU-15: aparece toast de cumpleaños en vivo
-7. Click en el toast de cumpleaños    ->  pantalla de chat con el cumpleañero
+1. http://localhost:4200/             ->  Home (decoración) como martin
+2. "Buscar usuarios"                  ->  CU-7: buscar por nombre/apellido
+                                          CU-13: "personas que quizás conozcas" (+2 amigos)
+3. java scripts/TriggerSolicitud.java ->  CU-14: toast de solicitud en vivo (SSE)
+4. Click en el toast / la campana     ->  pantalla de solicitudes (aceptar/rechazar)
+5. java scripts/TriggerCumple.java    ->  CU-15: toast de cumpleaños en vivo (SSE)
+6. Click en el toast de cumpleaños    ->  chat con el cumpleañero (demo solo-front)
 ```
 
 ---
 
-## Reglas de negocio implementadas
+## Reglas de negocio implementadas (4 CU)
 
-- Las contraseñas se almacenan **hasheadas con BCrypt** — nunca en texto plano.
-- El email y el nombre de usuario deben ser **únicos** (registro rechaza duplicados con 409).
-- La contraseña debe tener **mínimo 6 caracteres** (validado en frontend y backend).
-- El buscador lista usuarios con **al menos N amigos en común** (N=2 por defecto), excluyendo
-  al propio usuario y a sus amigos directos ("personas que quizás conozcas").
-- Si la búsqueda no arroja resultados, el backend responde **404** con el mensaje
+- **Usuario actual fijo:** `martin` (id=1), sin login ni sesión.
+- **CU-7:** la búsqueda matchea por **nombre o apellido** (coincidencia parcial, insensible a
+  mayúsculas). Sin resultados → lista vacía.
+- **CU-13:** lista usuarios con **al menos N amigos en común** (N=2 por defecto), excluyendo al
+  propio usuario y a sus amigos directos ("personas que quizás conozcas"). Si no hay → **404**
   "No se encontraron usuarios".
-- Las notificaciones se **rutean por usuario** vía SSE: cada cliente recibe sólo las suyas.
-- El batch de cumpleaños notifica a **los amigos** del cumpleañero, sólo si la fecha coincide con hoy.
+- **CU-14:** enviar una solicitud la **persiste y notifica** al destinatario por llamada directa
+  (toast SSE + email stub). Guardas: si ya son amigos o si ya hay una pendiente → **409**.
+- **CU-15:** el batch notifica a **los amigos del cumpleañero**, solo si la fecha coincide con hoy.
+- **Notificaciones ruteadas por usuario** vía SSE: cada cliente recibe solo las suyas.
 
 ---
 
 ## Tests
 
-Tests unitarios de la capa de servicios con **JUnit 5 + Mockito** (no requieren MySQL).
+Tests unitarios de la capa de servicios con **JUnit 5 + Mockito** (no requieren base de datos):
 
 ```bash
 cd backend
 ./mvnw test
 ```
 
-Cubren los casos de prueba documentados en `docs/tests/TEST_PLAN.md`:
+| Test | CP | CU |
+|---|---|---|
+| `UsuarioServiceTest` — buscar (coincidencias / sin resultados) | CP 1.3.1–1.3.3 / 1.3.5 | **CU-7** |
+| `UsuarioServiceTest` — listar +2 amigos (≥2 / vacío → 404) | CP 11.1.1 / 11.1.2 | **CU-13** |
+| `SolicitudAmistadServiceTest` — notifica al enviar (+ aceptar / rechazar) | CP 8.2.1 | **CU-14** |
+| `CumpleanosServiceTest` — notifica hoy / no fuera de fecha | CP 9.2.1 / 9.2.2 | **CU-15** |
 
-| Test | CP documentado |
-|---|---|
-| Notificación de solicitud de amistad generada | CP 8.2.1 |
-| Notificación de cumpleaños en fecha correcta | CP 9.2.1 |
-| Sin notificación de cumpleaños fuera de fecha | CP 9.2.2 |
-| Listar usuarios con +2 amigos en común | CP 11.1.1 |
-| Búsqueda sin resultados (lista vacía → 404) | CP 11.1.2 |
-| Registro exitoso / email duplicado / usuario duplicado | — |
+Estado: **10 tests, 0 fallas.** Los casos de prueba y procedimientos están en `docs/pruebas/`
+(`CP-*.md`, `PP-*.md`, `Plan de Prueba.md`).
 
 ---
 
-## Documentación
+## Documentación de diseño
 
-- Plan de implementación: `docs/IMPL_PLAN.md`
-- Plan de pruebas: `docs/tests/TEST_PLAN.md`
-- Diagramas de diseño y análisis: `docs/diseño/`, `docs/analisis/`
+Todo en `docs/`:
+
+- **Desvíos respecto a los diagramas originales:** `docs/diseño/CAMBIOS.md` *(leer primero)*.
+- **Diagramas de secuencia** (front + back, por CU): `docs/diseño/diag_sec/diag_sec-CU-{7,13,14,15}.drawio`.
+- **Diagramas de clases** (separados): `docs/diseño/diagrama_clases_back.drawio` y `…_front.drawio`.
+- **Diagramas de estado** (por CU): `docs/diseño/diag_estados/diag_estados-CU-{7,13,14,15}.drawio`.
+- **Pruebas:** `docs/pruebas/` · **Análisis y requerimientos:** `docs/analisis/`, `docs/requerimientos/`.

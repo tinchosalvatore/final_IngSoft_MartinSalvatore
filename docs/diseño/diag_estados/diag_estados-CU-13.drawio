@@ -1,0 +1,22 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="Estados CU-13 BuscadorComponent" id="Estados CU-13 BuscadorComponent">
+    <mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="t" value="BuscadorComponent — sugerencias (CU-13)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6A0;strokeColor=#D6B656;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="320" height="30" as="geometry"/></mxCell>
+        <mxCell id="i" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="130" y="80" width="20" height="20" as="geometry"/></mxCell>
+        <mxCell id="carg" value="Cargando" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;arcSize=30;" vertex="1" parent="1"><mxGeometry x="60" y="150" width="170" height="44" as="geometry"/></mxCell>
+        <mxCell id="dec" value="¿hay&lt;br&gt;sugerencias?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;" vertex="1" parent="1"><mxGeometry x="95" y="260" width="110" height="80" as="geometry"/></mxCell>
+        <mxCell id="most" value="MostrandoSugerencias" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;arcSize=30;" vertex="1" parent="1"><mxGeometry x="380" y="270" width="210" height="46" as="geometry"/></mxCell>
+        <mxCell id="sin" value="SinSugerencias" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;arcSize=30;" vertex="1" parent="1"><mxGeometry x="70" y="400" width="180" height="44" as="geometry"/></mxCell>
+        <mxCell id="recg" value="Recargando" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;arcSize=30;" vertex="1" parent="1"><mxGeometry x="400" y="400" width="170" height="44" as="geometry"/></mxCell>
+        <mxCell id="fin" value="" style="ellipse;fillColor=none;strokeColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="475" y="520" width="26" height="26" as="geometry"/></mxCell>
+        <mxCell id="s1" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="482" y="527" width="12" height="12" as="geometry"/></mxCell>
+        <mxCell id="s2" value="ngOnInit() / buscarConAmigosEnComun(2)" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="i" target="carg"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="s3" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="carg" target="dec"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="s4" value="[hay sugerencias]" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="dec" target="most"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="s5" value="[404 / lista vacía]" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="dec" target="sin"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="s6" value="recargarSugerencias() / agregarSugerenciaExtra()" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="most" target="recg"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="s7" value="[lote nuevo]  |  [404 → toast &#x27;no hay más&#x27;]" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="recg" target="most"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="620" y="422"/><mxPoint x="620" y="293"/></Array></mxGeometry></mxCell>
+        <mxCell id="s8" value="verPerfil(u) → abre /perfil" style="endArrow=block;html=1;rounded=0;strokeColor=#333333;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="most" target="fin"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+      </root></mxGraphModel>
+  </diagram>
+</mxfile>

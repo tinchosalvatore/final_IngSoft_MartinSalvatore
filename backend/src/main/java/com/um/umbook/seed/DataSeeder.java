@@ -23,10 +23,12 @@ import java.time.LocalDate;
  *   Fede   -- Ana                => 1 amigo en comun con Martin   (NO aparece en CU-13)
  *   Gabi   -- (sin amigos)       => 0                              (NO aparece)
  *   Tincho -- Ana, Beto, Carla   => 3 amigos en comun con Martin  (aparece en CU-13).
- *            Logueado como Tincho: ve a Martin/Diego/Eva como sugerencias y, como Ana (su
- *            amiga) cumple hoy, recibe la notificacion de cumpleaños (CU-15).
  *
- * Cumpleaños: Ana cumple hoy (para disparar CU-15 sin scripts).
+ * Usuario observado de la demo = Martin (id=1): ve a Diego/Eva/Tincho como sugerencias (CU-13)
+ * y, como Ana (su amiga) cumple hoy, recibe la notificacion de cumpleaños (CU-15). Los scripts
+ * de demo apuntan a Martin (id=1) por defecto.
+ *
+ * Cumpleaños: Ana cumple hoy (para disparar CU-15 sin elegir cumpleañero a mano).
  */
 @Component
 public class DataSeeder implements CommandLineRunner {

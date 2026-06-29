@@ -1,8 +1,8 @@
-# CAMBIOS — dónde el código se despega de los diagramas (CU-7, 13, 14, 15)
+# CAMBIOS — dónde el código se despega de los diagramas originales (CU-7, 13, 14, 15)
 
 Este documento registra **dónde la implementación se aparta de los diagramas de diseño**
 (`docs/diseño/diag_sec/` y `docs/diseño/diagrama_clases.svg`) para los **4 CU que se mantienen
-1:1 estricto: CU-7, CU-13, CU-14, CU-15**. Sirve de insumo para **rehacer los diagramas de
+1:1 estricto: CU-7, CU-13, CU-14, CU-15**. Sirve de insumo para **corregir los diagramas de
 secuencia y el diagrama de clases** solo con lo realmente 1:1.
 
 Regla aplicada: el profesor toma el 1:1 sobre el **diagrama de clases**. Cuando una **secuencia**

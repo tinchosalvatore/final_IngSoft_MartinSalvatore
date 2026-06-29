@@ -13,8 +13,8 @@ import java.net.http.HttpResponse;
  *   java scripts/TriggerSolicitud.java
  *   java scripts/TriggerSolicitud.java <remitenteId> <destinatarioId>
  *
- * Por defecto: remitente=7 (fede), destinatario=9 (tincho11, el usuario observado de la demo).
- * fede no es amigo de tincho11, asi que la solicitud pasa las guardas de CU-6.
+ * Por defecto: remitente=7 (fede), destinatario=1 (martin, el usuario observado de la demo).
+ * fede no es amigo de martin, asi que la solicitud pasa las guardas de CU-6.
  * Requiere el backend corriendo en http://localhost:8080.
  */
 public class TriggerSolicitud {
@@ -22,9 +22,9 @@ public class TriggerSolicitud {
     private static final String BASE = "http://localhost:8080";
 
     public static void main(String[] args) throws Exception {
-        // Por defecto remitente=7 (fede), destinatario=9 (tincho11, el usuario observado).
+        // Por defecto remitente=7 (fede), destinatario=1 (martin, el usuario observado).
         String remitente = args.length >= 1 ? args[0] : "7";
-        String destinatario = args.length >= 2 ? args[1] : "9";
+        String destinatario = args.length >= 2 ? args[1] : "1";
         String url = BASE + "/solicitudes?remitenteId=" + remitente + "&destinatarioId=" + destinatario;
 
         HttpClient client = HttpClient.newHttpClient();

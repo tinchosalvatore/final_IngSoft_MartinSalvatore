@@ -12,8 +12,8 @@ import java.net.http.HttpResponse;
  * Si se pasa un usuarioId, primero edita su cumpleaños a HOY (accion real de perfil,
  * PUT /usuarios/{id}/cumpleanos) y despues corre el batch, para elegir el cumpleañero.
  * Sin argumentos, corre el batch tal cual: el seed deja a Ana (id=2) cumpliendo hoy, y como
- * Ana es amiga de tincho11 (el usuario observado de la demo), el toast le llega a tincho11.
- * Para elegir otro cumpleañero que notifique a tincho11, pasale un amigo suyo: 2 (ana),
+ * Ana es amiga de martin (el usuario observado de la demo), el toast le llega a martin.
+ * Para elegir otro cumpleañero que notifique a martin, pasale un amigo suyo: 2 (ana),
  * 3 (beto) o 4 (carla). Ej: java scripts/TriggerCumple.java 3
  *
  * Uso (Java 21, single-file, no requiere compilar):

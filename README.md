@@ -5,7 +5,7 @@ Examen final de Ingeniería de Software (Proceso Unificado de Desarrollo). UM-Bo
 
 > **Importante para la corrección:** solo **4 casos de uso** están implementados **1:1 estricto**
 > con el diseño (clases, métodos, parámetros y retornos — front y back). El resto del sistema es
-> **andamiaje de demo** para que la app no se sienta vacía y **no debe evaluarse como 1:1**. El
+> **andamiaje de demo** para que la app no se sienta vacía y **no fue codificada 1:1** por cuestiones de tiempo. El
 > detalle está en la sección [Alcance](#alcance--qué-es-11-y-qué-no) de acá abajo.
 
 ---
@@ -14,19 +14,15 @@ Examen final de Ingeniería de Software (Proceso Unificado de Desarrollo). UM-Bo
 
 | Categoría | Qué incluye | Cómo evaluarlo |
 |---|---|---|
-| ✅ **1:1 estricto** | **CU-7** Buscar Usuarios · **CU-13** Listar Usuarios con +2 Amigos en Común · **CU-14** Notificar Solicitud de Amistad · **CU-15** Notificar Cumpleaños | Implementados **fullstack 1:1** (front + back). Es lo que hay que corregir contra los diagramas. |
-| 🔧 **Soporte funcional** | **CU-6** Enviar Solicitud · **CU-18** Gestionar Solicitudes (aceptar/rechazar) | Funcionan y son coherentes con el diseño, pero **no son objetivo de 1:1**. CU-14 los necesita: enviar dispara la notificación y el click del toast aterriza en la lista de pendientes. |
-| 🎨 **Decoración (NO 1:1)** | **Home** (feed y contactos mockeados) · **Perfil** (placeholder) · **Chat** (demo solo-front, respuesta precargada) | UI sin lógica de negocio real, solo para dar vida a la demo. **No evaluar como 1:1.** |
-| ❌ **Eliminado** | **CU-1** Registrarse · **CU-2** Iniciar Sesión | Quitados por completo (front y back): **no hay login ni sesión**. |
+| ✅ **1:1 estricto** | **CU-7** Buscar Usuarios · **CU-13** Listar Usuarios con +2 Amigos en Común · **CU-14** Notificar Solicitud de Amistad · **CU-15** Notificar Cumpleaños | Implementados **fullstack 1:1** (front + back) con el Diseño. |
+| 🔧 **Soporte funcional** | **CU-6** Enviar Solicitud · **CU-18** Gestionar Solicitudes (aceptar/rechazar) | Funcionan y son coherentes con el diseño, pero **no cumplen al 100% con el 1:1**. CU-14 los necesita: enviar dispara la notificación y el click del toast aterriza en la lista de pendientes. |
+| 🎨 **Decoración (NO 1:1)** | **Home** (feed y contactos mockeados) · **Perfil** (placeholder) · **Chat** (demo solo-front, respuesta precargada) | UI sin lógica de negocio real, solo para dar vida a la demo. |
 
-**Decisiones clave**
 
-- **Sin autenticación.** No hay login, registro ni sesión. El "usuario actual" es **fijo: `martin`
-  (id=1)**, sembrado por `DataSeeder` y resuelto internamente en el backend. Se eliminó el
-  parámetro `usuarioId` de todos los endpoints (no estaba en el diseño).
-- **Dónde el código se aparta de los diagramas originales** (y por qué) está documentado en
-  **[`docs/diseño/CAMBIOS.md`](docs/diseño/CAMBIOS.md)**. Conviene leerlo junto con los diagramas
-  nuevos (ver [Documentación de diseño](#documentación-de-diseño)).
+**Estado de Demo**
+
+- **Usuario**:  Usuario demo **fijo: `martin` (id=1)**
+- **Seed**: La data es  sembrada por `DataSeeder` y resuelta internamente en el backend.
 
 ---
 
@@ -121,8 +117,7 @@ java scripts/TriggerSolicitud.java   # CU-14 — toast de solicitud (fede=7 -> m
 java scripts/TriggerCumple.java      # CU-15 — toast de cumpleaños (Ana cumple hoy -> notifica a martin)
 ```
 
-> Los scripts ya apuntan por defecto al usuario observado (**martin, id=1**). Aceptan ids
-> opcionales (ver `scripts/README.md`).
+> Los scripts apuntan por defecto al usuario demo (para mas info del funcionamiento interno de los scripts ver `scripts/README.md`).
 
 ---
 
@@ -162,7 +157,7 @@ java scripts/TriggerCumple.java      # CU-15 — toast de cumpleaños (Ana cumpl
 
 ## Reglas de negocio implementadas (4 CU)
 
-- **Usuario actual fijo:** `martin` (id=1), sin login ni sesión.
+- **Usuario actual fijo:** `martin` (id=1), sin login ni sesión por estar fuera de alcance de CU.
 - **CU-7:** la búsqueda matchea por **nombre o apellido** (coincidencia parcial, insensible a
   mayúsculas). Sin resultados → lista vacía.
 - **CU-13:** lista usuarios con **al menos N amigos en común** (N=2 por defecto), excluyendo al
@@ -200,8 +195,7 @@ Estado: **10 tests, 0 fallas.** Los casos de prueba y procedimientos están en `
 
 Todo en `docs/`:
 
-- **Desvíos respecto a los diagramas originales:** `docs/diseño/CAMBIOS.md` *(leer primero)*.
-- **Diagramas de secuencia** (front + back, por CU): `docs/diseño/diag_sec/diag_sec-CU-{7,13,14,15}.drawio`.
-- **Diagramas de clases** (separados): `docs/diseño/diagrama_clases_back.drawio` y `…_front.drawio`.
-- **Diagramas de estado** (por CU): `docs/diseño/diag_estados/diag_estados-CU-{7,13,14,15}.drawio`.
+- **Diagramas de secuencia** (front + back, por CU): `docs/diseño/diag_sec/diag_sec-CU-{7,13,14,15}`.
+- **Diagramas de clases** (separados): `docs/diseño/diag_clases/diagrama_clases_back` y `…_front`.
+- **Diagramas de estado** (por CU): `docs/diseño/diag_estados/diag_estados-CU-{7,13,14,15}`.
 - **Pruebas:** `docs/pruebas/` · **Análisis y requerimientos:** `docs/analisis/`, `docs/requerimientos/`.

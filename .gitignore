@@ -57,3 +57,6 @@ Thumbs.db
 # random
 CLAUDE.md
 docs/presentacion.html
+
+# notas de estudio personales (no van al repo ni al profe)
+docs/diseño/diag_sec/study_*.md

@@ -15,7 +15,7 @@ export class NotificacionService {
   private eventSource?: EventSource;
   private notificacionesSubject = new Subject<Notificacion>();
 
-  /** Stream de notificaciones entrantes (para el ToastComponent). */
+  /** Stream de notificaciones entrantes (para el ToastComponent) usadas por el back de CU-14 y CU-15. */
   notificaciones$ = this.notificacionesSubject.asObservable();
 
   constructor(private http: HttpClient, private zone: NgZone) {}
@@ -33,10 +33,7 @@ export class NotificacionService {
     });
   }
 
-  /**
-   * Emite una notificacion generada en el front (no viene del SSE). Se usa para mostrar
-   * en el mismo toast las excepciones de dominio, ej. CU-13 sin mas sugerencias.
-   */
+
   emitirLocal(notificacion: Notificacion): void {
     this.notificacionesSubject.next(notificacion);
   }

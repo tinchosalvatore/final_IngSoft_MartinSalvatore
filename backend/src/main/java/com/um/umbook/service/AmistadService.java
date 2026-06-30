@@ -24,7 +24,7 @@ public class AmistadService {
         this.notificacionService = notificacionService;
     }
 
-    /** Amigos de un usuario (el otro extremo de cada amistad, sin importar el orden del par). */
+    /** Amigos de un usuario. */
     public List<Usuario> obtenerAmigos(Usuario usuario) {
         List<Usuario> amigos = new ArrayList<>();
         for (Amistad a : amistadRepository.findByUsuario1OrUsuario2(usuario, usuario)) {

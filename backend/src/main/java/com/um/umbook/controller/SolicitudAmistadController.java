@@ -27,7 +27,7 @@ import java.util.Map;
 public class SolicitudAmistadController {
 
     private static final Long DEMO_USUARIO_ID = 1L;
-    /** Remitente por defecto: 'fede' (id=7), que NO es amigo de martin. */
+    /** Remitente por defecto: 'fede' (id=7), que NO es amigo de martin id=1. */
     private static final Long DEMO_REMITENTE_ID = 7L;
 
     private final SolicitudAmistadService solicitudService;
@@ -63,6 +63,7 @@ public class SolicitudAmistadController {
         return u;
     }
 
+    // CU-14 al final del get de pendientes llega la Lista
     @GetMapping("/pendientes")
     public ResponseEntity<List<SolicitudAmistadDTO>> obtenerSolicitudes() {
         Usuario usuario = usuarioService.obtenerPorId(DEMO_USUARIO_ID);

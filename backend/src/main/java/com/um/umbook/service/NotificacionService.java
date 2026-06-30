@@ -54,7 +54,7 @@ public class NotificacionService {
     }
 
     /**
-     * Crea (persiste) una notificacion y la emite en vivo por SSE al destinatario.
+     * Persiste una notificacion y la emite en vivo por SSE al destinatario.
      * Firma 1:1 con el diagrama de clases: el mensaje se arma internamente segun el tipo.
      */
     public void crearNotificacion(Usuario destinatario, TipoNotificacion tipo, Long referenciaId) {
@@ -62,7 +62,7 @@ public class NotificacionService {
     }
 
     /**
-     * EXTRA (no esta en el diagrama, ver docs/EXTRAS.md): overload con mensaje detallado para que
+     * SSE overload con mensaje detallado para que
      * el toast en vivo muestre texto especifico (ej. "Fede te envio una solicitud") en lugar del
      * generico. Persiste la notificacion y la emite por SSE al destinatario.
      */
@@ -70,7 +70,7 @@ public class NotificacionService {
                                   Long referenciaId, String mensaje) {
         Notificacion notificacion = notificacionRepository.save(
                 new Notificacion(destinatario, tipo, referenciaId));
-        emitirNotificacion(destinatario.getId(), NotificacionDTO.fromEntity(notificacion, mensaje));
+        emitirNotificacion(destinatario.getId(), NotificacionDTO.fromEntity(notificacion, mensaje)); // SSE al front
     }
 
     /**

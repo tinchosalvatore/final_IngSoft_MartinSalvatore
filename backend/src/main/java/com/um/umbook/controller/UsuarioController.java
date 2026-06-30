@@ -19,8 +19,7 @@ import java.util.List;
 /**
  * Endpoints de usuarios. CU-13: GET /usuarios?amigosEnComun=2; CU-7: GET /usuarios/buscar.
  *
- * No hay login/sesion: el "usuario actual" es el usuario de referencia de la demo (martin, id=1),
- * resuelto internamente. El diseño no modela el id del usuario actual como parametro.
+ * el "Usuario actual" es el usuario de referencia de la demo (martin, id=1), resuelto internamente.
  */
 @RestController
 @RequestMapping("/usuarios")

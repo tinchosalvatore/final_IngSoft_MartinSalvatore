@@ -19,6 +19,7 @@ public class JavaMailService {
         log.info("[MAIL STUB] para={} asunto='{}' cuerpo='{}'", destinatario, asunto, cuerpo);
     }
 
+    // CU-14
     public void enviarEmailSolicitudAmistad(SolicitudAmistad solicitud) {
         enviarEmail(solicitud.getDestinatario().getEmail(),
                 "Nueva solicitud de amistad",
@@ -26,6 +27,7 @@ public class JavaMailService {
                         + solicitud.getTokenEmail());
     }
 
+    // CU-15
     public void enviarEmailCumpleanos(Usuario usuario, Usuario amigo) {
         enviarEmail(usuario.getEmail(),
                 "Cumpleaños de un amigo",

@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Logica de cumpleaños (CU-15). El batch diario detecta quienes cumplen hoy y, segun el diagrama
- * de clases, llama directamente al servicio de notificaciones para avisar a los amigos.
+ * Logica de cumpleaños (CU-15). El batch diario detecta quienes cumplen hoy.
  * Campos del diagrama: notificacionService + usuarioRepository. amistadService es una dependencia
- * EXTRA (necesaria para el fan-out a amigos, ver docs/EXTRAS.md).
  */
 @Service
 public class CumpleanosService {
@@ -35,9 +33,10 @@ public class CumpleanosService {
         this.amistadService = amistadService;
     }
 
-    /** Usuarios cuyo dia y mes de nacimiento coinciden con hoy. */
+    /** Busca Usuarios cuyo dia y mes de nacimiento coinciden con hoy. Parte de la funcion BatchDiario del CU-15 */
     public List<Usuario> obtenerUsuariosConCumpleanos() {
         MonthDay hoy = MonthDay.from(LocalDate.now());
+        // pide todos los Usuarios al Repository y depsues compara fechas para detectar cumpleaños
         return usuarioRepository.findAll().stream()
                 .filter(u -> u.getFechaNacimiento() != null
                         && MonthDay.from(u.getFechaNacimiento()).equals(hoy))
@@ -66,7 +65,7 @@ public class CumpleanosService {
 
     /**
      * Envia el email de cumpleaños a los amigos de cada cumpleañero de hoy, delegando en el
-     * servicio de notificaciones (que a su vez usa el mail). 1:1 con el diagrama de clases.
+     * servicio de notificaciones (que a su vez usa el mail). Parte de la funcion BatchDiario del CU-15
      */
     public void enviarEmailsCumpleanos() {
         for (Usuario cumpleanero : obtenerUsuariosConCumpleanos()) {

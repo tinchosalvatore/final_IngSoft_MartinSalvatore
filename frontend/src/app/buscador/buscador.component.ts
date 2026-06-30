@@ -25,7 +25,7 @@ import { UsuarioService } from '../services/usuario.service';
 })
 export class BuscadorComponent implements OnInit, OnDestroy {
 
-  /** Minimo de amigos en comun para las sugerencias. Es el CU-13: fijo en 2. */
+  // Variable de cantidad de amigos para recomendaciones. El CU-13 dice 2.
   private static readonly MIN_AMIGOS = 2;
 
   query = '';
@@ -47,7 +47,7 @@ export class BuscadorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Pipeline reactivo: espera 300ms tras la ultima tecla, ignora repetidos, y
-    // segun haya texto o no, busca por nombre o trae las sugerencias del CU-13.
+    // segun haya texto o no, busca por nombre (CU-7) o trae las sugerencias del (CU-13).
     this.sub = this.termino$
       .pipe(
         debounceTime(300),
@@ -56,13 +56,13 @@ export class BuscadorComponent implements OnInit, OnDestroy {
           this.buscando = true;
           this.modoBusqueda = texto.trim().length > 0;
           const peticion = this.modoBusqueda
-            ? this.usuarioService.buscarPorTexto(texto.trim())
-            : this.usuarioService.buscarConAmigosEnComun(BuscadorComponent.MIN_AMIGOS);
+            ? this.usuarioService.buscarPorTexto(texto.trim())  // CU-7: busca por texto
+            : this.usuarioService.buscarConAmigosEnComun(BuscadorComponent.MIN_AMIGOS);  // CU-13: busca con amigos en comun
           // El backend devuelve 404 cuando no hay sugerencias: lo tratamos como lista vacia.
           return peticion.pipe(catchError(() => of([] as Usuario[])));
         })
       )
-      .subscribe((data) => {
+      .subscribe((data) => {  // esta linea es la que recibe el resultado del CU-7 y CU-13
         this.usuarios = data;
         this.buscando = false;
       });
